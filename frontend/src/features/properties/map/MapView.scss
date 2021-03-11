@@ -1,6 +1,8 @@
 @import '../../../variables';
 @import '../../../colors.scss';
 
+$narrowSidebarSize: 700px;
+
 .map-side-drawer {
   transition: 1s;
   height: calc(100vh - #{$footer-height} - #{$header-height} - #{$navbar-height});
@@ -8,9 +10,20 @@
   z-index: 999;
   min-width: 930px;
   margin-left: -930px;
-  background-color: $form-background-color;
-  padding: 10px;
+  background-color: #fff;
   position: absolute;
+  max-width: 930px;
+  &.close {
+    z-index: -1;
+    max-width: $narrowSidebarSize;
+  }
+  &.narrow {
+    min-width: $narrowSidebarSize;
+    max-width: $narrowSidebarSize;
+  }
+  > div {
+    padding: 20px;
+  }
 }
 .map-filter-container {
   transition: margin 1s;
@@ -18,10 +31,16 @@
 .map {
   transition: margin 1s, width 1s;
   margin-left: 0px;
+  position: relative;
 }
 .side-bar .map {
   margin-left: 930px;
   width: calc(100vw - 930px);
+
+  &.narrow {
+    margin-left: $narrowSidebarSize;
+    width: calc(100vw - #{$narrowSidebarSize});
+  }
 }
 .side-bar {
   .map-side-drawer {
@@ -56,11 +75,16 @@
 .parcel-cursor,
 .parcel-cursor .map .leaflet-container.leaflet-grab,
 .parcel-cursor .map .leaflet-container.leaflet-grab .leaflet-interactive {
-  cursor: url('../../../assets/images/marker-icon-1x-green.png') 12.5 41, default;
+  cursor: url('../../../assets/images/pins/marker-icon-1x-green.png') 12.5 41, default;
 }
 
 .building-cursor,
 .building-cursor .map .leaflet-container.leaflet-grab,
 .building-cursor .map .leaflet-container.leaflet-grab .leaflet-interactive {
-  cursor: url('../../../assets/images/marker-icon-1x-blue.png') 12.5 41, default;
+  cursor: url('../../../assets/images/pins/marker-icon-1x-blue.png') 12.5 41, default;
+}
+
+.map .leaflet-marker-icon.leaflet-interactive div,
+.map .leaflet-marker-icon.leaflet-interactive span {
+  pointer-events: none;
 }

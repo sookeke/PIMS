@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FormControlProps, Container } from 'react-bootstrap';
 import { useFormikContext, getIn } from 'formik';
 import { IProperty, clickableTooltip } from '../../common';
 import { DisplayError } from 'components/common/form';
 import { Table } from 'components/Table';
 import classNames from 'classnames';
-import { useHistory } from 'react-router-dom';
 import { getPropertyColumns, getColumnsWithRemove } from './columns';
 import { useStepper } from 'features/projects/dispose';
+import queryString from 'query-string';
+import { PropertyTypes } from 'constants/propertyTypes';
 
 type RequiredAttributes = {
   /** The field name */
@@ -55,7 +56,6 @@ export const PropertyListViewUpdate: React.FC<InputProps> = ({
   editableZoning,
   classificationLimitLabels,
 }) => {
-  const history = useHistory();
   const { values, setFieldValue } = useFormikContext<any>();
   const existingProperties: IProperty[] = getIn(values, field);
   const { project } = useStepper();
@@ -88,6 +88,21 @@ export const PropertyListViewUpdate: React.FC<InputProps> = ({
     ],
   );
 
+  const onRowClick = useCallback((row: IProperty) => {
+    window.open(
+      `/mapview?${queryString.stringify({
+        sidebar: true,
+        disabled: true,
+        loadDraft: false,
+        parcelId: [PropertyTypes.PARCEL, PropertyTypes.SUBDIVISION].includes(row.propertyTypeId)
+          ? row.id
+          : undefined,
+        buildingId: row.propertyTypeId === PropertyTypes.BUILDING ? row.id : undefined,
+      })}`,
+      '_blank',
+    );
+  }, []);
+
   return (
     <Container fluid>
       <div className={classNames('ScrollContainer', outerClassName)}>
@@ -100,13 +115,7 @@ export const PropertyListViewUpdate: React.FC<InputProps> = ({
           lockPageSize
           setSelectedRows={setSelectedRows}
           footer
-          onRowClick={(row: IProperty) => {
-            history.push(
-              `/mapview/${
-                row.propertyTypeId === 0 ? row.id : row.parcelId
-              }?disabled=true&sidebar=true&loadDraft=false`,
-            );
-          }}
+          onRowClick={onRowClick}
         />
       </div>
       <DisplayError field={field} />

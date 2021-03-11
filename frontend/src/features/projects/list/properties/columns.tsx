@@ -1,14 +1,8 @@
-import { ReactComponent as BuildingSvg } from 'assets/images/icon-business.svg';
-import { ReactComponent as LandSvg } from 'assets/images/icon-lot.svg';
-
-import React from 'react';
 import { CellProps } from 'react-table';
-import { Link } from 'react-router-dom';
-import { formatMoney, formatNumber } from 'utils';
-import { ColumnWithProps } from 'components/Table';
+import { formatNumber } from 'utils';
+import { ColumnWithProps, ViewPropertyCell, MoneyCell } from 'components/Table';
 import { IProperty } from '../../common/interfaces';
-
-const MoneyCell = ({ cell: { value } }: CellProps<IProperty, number>) => formatMoney(value);
+import { PropertyTypeCell } from 'components/Table/PropertyTypeCell';
 
 const NumberCell = ({ cell: { value } }: CellProps<IProperty, number>) => formatNumber(value);
 
@@ -39,8 +33,8 @@ export const columns: ColumnWithProps<IProperty>[] = [
     minWidth: 65, // px
   },
   {
-    Header: 'Property Name',
-    accessor: row => (row.name ? row.name : row.pid ?? row.pin),
+    Header: 'Name/PID',
+    accessor: row => (row.name ? `${row.name} ${row.pid}` : row.pid ?? row.pin),
     align: 'left',
     responsive: true,
     width: spacing.medium,
@@ -80,7 +74,7 @@ export const columns: ColumnWithProps<IProperty>[] = [
   },
   {
     Header: 'Assessed Value',
-    accessor: 'assessed',
+    accessor: 'assessedLand',
     Cell: MoneyCell,
     align: 'right',
     responsive: true,
@@ -108,9 +102,7 @@ export const columns: ColumnWithProps<IProperty>[] = [
   {
     Header: 'Type',
     accessor: 'propertyTypeId',
-    Cell: ({ cell: { value } }: CellProps<IProperty, number>) => {
-      return value === 0 ? <LandSvg className="svg" /> : <BuildingSvg className="svg" />;
-    },
+    Cell: PropertyTypeCell,
     responsive: true,
     width: spacing.small,
     minWidth: 65,
@@ -130,14 +122,6 @@ export const columns: ColumnWithProps<IProperty>[] = [
     responsive: true,
     width: spacing.small,
     minWidth: 65,
-    Cell: (props: CellProps<IProperty, number>) => {
-      return (
-        <Link
-          to={`/mapview/${props.row.original.parcelId}?disabled=true&sidebar=true&loadDraft=false`}
-        >
-          View
-        </Link>
-      );
-    },
+    Cell: ViewPropertyCell,
   },
 ];

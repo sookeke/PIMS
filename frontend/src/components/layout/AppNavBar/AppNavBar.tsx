@@ -1,27 +1,19 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Navbar, Nav, NavDropdown, Image } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import './AppNavBar.scss';
-import profileUrl from 'assets/images/profile.svg';
 import useKeycloakWrapper from 'hooks/useKeycloakWrapper';
 import { Claims } from 'constants/claims';
-import { useConfiguration } from 'hooks/useConfiguration';
 import { FaHome } from 'react-icons/fa';
 import queryString from 'query-string';
+import { SidebarContextType } from 'features/mapSideBar/hooks/useQueryParamSideBar';
+import { HelpContainer } from 'features/help/containers/HelpContainer';
 
 /**
  * Nav bar with role-based functionality.
  */
 function AppNavBar() {
-  const keycloak = useKeycloakWrapper();
   const history = useHistory();
-  const displayName =
-    keycloak.displayName ??
-    (!!keycloak.firstName && !!keycloak.lastName
-      ? `${keycloak.firstName} ${keycloak.lastName}`
-      : 'default');
-  const configuration = useConfiguration();
-
   return (
     <Navbar variant="dark" className="map-nav" expand="lg">
       <Navbar.Toggle aria-controls="collapse" className="navbar-dark mr-auto" />
@@ -37,22 +29,7 @@ function AppNavBar() {
           <ReportsDropdown />
         </Nav>
       </Navbar.Collapse>
-      <Nav className="profile align-items-center">
-        <Nav.Item className="profile-icon pr-0">
-          <Image src={profileUrl} rounded />
-        </Nav.Item>
-        <NavDropdown className="px-0" title={displayName} id="user-dropdown">
-          {history ? (
-            <NavDropdown.Item
-              onClick={() => {
-                keycloak.obj!.logout({ redirectUri: `${configuration.baseUrl}/logout` });
-              }}
-            >
-              Sign Out
-            </NavDropdown.Item>
-          ) : null}
-        </NavDropdown>
-      </Nav>
+      <HelpContainer />
     </Navbar>
   );
 }
@@ -65,6 +42,12 @@ function SubmitProperty() {
   const history = useHistory();
   return keycloak.hasClaim(Claims.PROPERTY_ADD) ? (
     <Nav.Link
+      className={
+        history.location.pathname.includes('mapview') &&
+        queryString.parse(history.location.search).sidebar === 'true'
+          ? 'active'
+          : 'idle'
+      }
       onClick={() =>
         history.push({
           pathname: '/mapview',
@@ -73,7 +56,11 @@ function SubmitProperty() {
             sidebar: true,
             disabled: false,
             loadDraft: false,
+            parcelId: undefined,
+            buildingId: undefined,
             new: true,
+            sidebarContext: SidebarContextType.ADD_PROPERTY_TYPE_SELECTOR,
+            sidebarSize: 'narrow',
           }),
         })
       }
@@ -90,7 +77,12 @@ function ViewInventory() {
   const keycloak = useKeycloakWrapper();
   const history = useHistory();
   return keycloak.hasClaim(Claims.PROPERTY_VIEW) ? (
-    <Nav.Link onClick={() => history.push('/properties/list')}>View Property Inventory</Nav.Link>
+    <Nav.Link
+      className={history.location.pathname.includes('properties/list') ? 'active' : 'idle'}
+      onClick={() => history.push('/properties/list')}
+    >
+      View Property Inventory
+    </Nav.Link>
   ) : null;
 }
 
@@ -121,10 +113,9 @@ function AdminDropdown() {
 function DisposeProjectsDropdown() {
   const history = useHistory();
   const keycloak = useKeycloakWrapper();
-  // admin-projects and admin-properties roles are needed to Create/View projects,
-  // but only dispose-approve is needed to see Approval requests
-  return (keycloak.hasClaim(Claims.ADMIN_PROPERTIES) && keycloak.hasClaim(Claims.ADMIN_PROJECTS)) ||
-    keycloak.hasClaim(Claims.DISPOSE_APPROVE) ? (
+  return keycloak.hasClaim(Claims.PROJECT_VIEW) ||
+    keycloak.hasClaim(Claims.DISPOSE_APPROVE) ||
+    keycloak.hasClaim(Claims.ADMIN_PROJECTS) ? (
     <NavDropdown
       className={
         history.location.pathname.includes('dispose') ||
@@ -135,15 +126,15 @@ function DisposeProjectsDropdown() {
       title="Disposal Projects"
       id="dispose"
     >
-      {keycloak.hasClaim(Claims.ADMIN_PROPERTIES) && keycloak.hasClaim(Claims.ADMIN_PROJECTS) && (
-        <>
-          <NavDropdown.Item onClick={() => history.push('/dispose')}>
-            Create Disposal Project
-          </NavDropdown.Item>
-          <NavDropdown.Item onClick={() => history.push('/projects/list')}>
-            View Projects
-          </NavDropdown.Item>
-        </>
+      {(keycloak.hasClaim(Claims.PROJECT_ADD) || keycloak.hasClaim(Claims.ADMIN_PROJECTS)) && (
+        <NavDropdown.Item onClick={() => history.push('/dispose')}>
+          Create Disposal Project
+        </NavDropdown.Item>
+      )}
+      {(keycloak.hasClaim(Claims.PROJECT_VIEW) || keycloak.hasClaim(Claims.ADMIN_PROJECTS)) && (
+        <NavDropdown.Item onClick={() => history.push('/projects/list')}>
+          View Projects
+        </NavDropdown.Item>
       )}
       {keycloak.hasClaim(Claims.DISPOSE_APPROVE) && (
         <NavDropdown.Item onClick={() => history.push('/projects/approval/requests')}>

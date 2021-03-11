@@ -1,6 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Review Approve Step renders correctly 1`] = `
+.c2 {
+  font-size: 12px;
+  margin-top: -100px;
+  max-width: 16.7%;
+}
+
+.c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+}
+
 .c0 {
   padding-left: 10px;
 }
@@ -69,10 +85,10 @@ exports[`Review Approve Step renders correctly 1`] = `
           </label>
           <input
             class="col-md-5 form-control"
+            data-testid="project-name"
             disabled=""
             id="input-name"
             name="name"
-            required=""
             value="my project"
           />
         </div>
@@ -91,6 +107,7 @@ exports[`Review Approve Step renders correctly 1`] = `
           </label>
           <textarea
             class="col-md-auto form-control"
+            data-testid="project-description"
             disabled=""
             id="input-description"
             name="description"
@@ -146,6 +163,20 @@ exports[`Review Approve Step renders correctly 1`] = `
         >
           Financial Information
         </h3>
+      </div>
+      <div
+        class="form-row"
+      >
+        <h6
+          class="col-md-12"
+          style="margin: 0px 0px 1rem 0px;"
+        >
+          These values are for the 
+          <strong>
+            project
+          </strong>
+          , not the individual properties.
+        </h6>
       </div>
       <div
         class="form-row"
@@ -317,7 +348,7 @@ exports[`Review Approve Step renders correctly 1`] = `
           class="col-md-12"
           style="margin: 1rem 0px;"
         >
-          Please make any necessary updates to the valuation information and the classification.
+          Please update  the property classification.
         </h6>
         <h2
           class="col-md-5"
@@ -341,7 +372,7 @@ exports[`Review Approve Step renders correctly 1`] = `
               <div
                 class="tr"
                 role="row"
-                style="display: flex; flex: 1 0 auto; min-width: 645px;"
+                style="display: flex; flex: 1 0 auto; min-width: 790px;"
               >
                 <div
                   class="th"
@@ -353,6 +384,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Agency
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -365,6 +399,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Name
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -377,6 +414,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Civic Address
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -389,6 +429,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Classification
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -401,6 +444,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Current Zoning Code
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -412,7 +458,10 @@ exports[`Review Approve Step renders correctly 1`] = `
                   <div
                     class="sortable-column"
                   >
-                    Potential Zoning Code
+                    Other Projects
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -425,6 +474,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Net Book Value
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -437,6 +489,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Market Value
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -448,7 +503,25 @@ exports[`Review Approve Step renders correctly 1`] = `
                   <div
                     class="sortable-column"
                   >
-                    Assessed Value
+                    Assessed Land
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="th"
+                  colspan="1"
+                  role="columnheader"
+                  style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
+                >
+                  <div
+                    class="sortable-column"
+                  >
+                    Assessed Building
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
                 <div
@@ -461,6 +534,9 @@ exports[`Review Approve Step renders correctly 1`] = `
                     class="sortable-column"
                   >
                     Type
+                    <span
+                      style="flex: 1 1 auto;"
+                    />
                   </div>
                 </div>
               </div>
@@ -475,7 +551,7 @@ exports[`Review Approve Step renders correctly 1`] = `
                 <div
                   class="tr"
                   role="row"
-                  style="display: flex; flex: 1 0 auto; min-width: 645px;"
+                  style="display: flex; flex: 1 0 auto; min-width: 790px;"
                 >
                   <div
                     class="td clickable"
@@ -516,34 +592,60 @@ exports[`Review Approve Step renders correctly 1`] = `
                     title="Click to view property details"
                   />
                   <div
-                    class="td clickable"
+                    class="td"
                     role="cell"
                     style="box-sizing: border-box; flex: 100 0 auto; min-width: 30px; width: 100px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
+                    title=""
+                  >
+                    <div
+                      class="c1"
+                    />
+                  </div>
+                  <div
+                    class="td clickable"
+                    role="cell"
+                    style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
                     title="Click to view property details"
-                  />
-                  <div
-                    class="td"
-                    role="cell"
-                    style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-                    title=""
                   >
-                    $223
+                    <div
+                      class="form-group"
+                    >
+                      $223
+                    </div>
                   </div>
                   <div
-                    class="td"
+                    class="td clickable"
                     role="cell"
                     style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-                    title=""
+                    title="Click to view property details"
                   >
-                    $123
+                    <div
+                      class="form-group"
+                    >
+                      $123
+                    </div>
                   </div>
                   <div
-                    class="td"
+                    class="td clickable"
                     role="cell"
                     style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-                    title=""
+                    title="Click to view property details"
                   >
-                    $123
+                    <div
+                      class="form-group"
+                    >
+                      $123
+                    </div>
+                  </div>
+                  <div
+                    class="td clickable"
+                    role="cell"
+                    style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
+                    title="Click to view property details"
+                  >
+                    <div
+                      class="form-group"
+                    />
                   </div>
                   <div
                     class="td clickable"
@@ -553,7 +655,6 @@ exports[`Review Approve Step renders correctly 1`] = `
                   >
                     <svg
                       class="svg"
-                      title="Land"
                     >
                       icon-lot.svg
                     </svg>
@@ -567,7 +668,7 @@ exports[`Review Approve Step renders correctly 1`] = `
               <div
                 class="tr"
                 role="row"
-                style="display: flex; flex: 1 0 auto; min-width: 645px;"
+                style="display: flex; flex: 1 0 auto; min-width: 790px;"
               >
                 <div
                   class="th"
@@ -614,6 +715,14 @@ exports[`Review Approve Step renders correctly 1`] = `
                   colspan="1"
                   role="columnheader"
                   style="box-sizing: border-box; flex: 100 0 auto; min-width: 30px; width: 100px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
+                >
+                   
+                </div>
+                <div
+                  class="th"
+                  colspan="1"
+                  role="columnheader"
+                  style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
                 >
                    
                 </div>
@@ -722,6 +831,80 @@ exports[`Review Approve Step renders correctly 1`] = `
     <h3>
       Documentation
     </h3>
+    <h3>
+      Enhanced Referral Process Exemption
+      <svg
+        class="tooltip-icon"
+        fill="currentColor"
+        height="1em"
+        stroke="currentColor"
+        stroke-width="0"
+        viewBox="0 0 512 512"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"
+        />
+      </svg>
+    </h3>
+    <div
+      class="ProjectExemptionRequestCheck form-row"
+    >
+      <div
+        class="form-group"
+      >
+        <div
+          class="check-field"
+        >
+          <div
+            class="form-check"
+          >
+            <input
+              checked=""
+              class="form-check-input position-static"
+              disabled=""
+              id="input-exemptionRequested"
+              name="exemptionRequested"
+              type="checkbox"
+              value="true"
+            />
+          </div>
+          <label
+            class="text-wrap form-label"
+            for="input-exemptionRequested"
+          >
+            Apply for Enhanced Referral Process exemption
+          </label>
+        </div>
+      </div>
+    </div>
+    <p>
+      <i>
+        Please provide your rationale below for exemption request
+      </i>
+    </p>
+    <div
+      class="ProjectExemptionRequestRationale form-row"
+    >
+      <div
+        class="col-md-10 form-group"
+      >
+        <label
+          class="form-label"
+          for="input-exemptionRationale"
+        >
+          Rationale
+        </label>
+        <textarea
+          class="col-md-auto form-control"
+          id="input-exemptionRationale"
+          name="exemptionRationale"
+        >
+          rationale
+        </textarea>
+      </div>
+    </div>
     <div
       class="ProjectNotes form-row"
     >
@@ -732,7 +915,7 @@ exports[`Review Approve Step renders correctly 1`] = `
           class="form-label"
           for="input-documentationNote"
         >
-          Note
+          Documentation Notes
         </label>
         <textarea
           class="col-md-auto form-control"
@@ -806,13 +989,18 @@ exports[`Review Approve Step renders correctly 1`] = `
               class="form-label"
               for="input-appraisedNote"
             >
-              Note
+              Appraisal Notes
             </label>
             <textarea
               class="col-md-auto form-control"
               id="input-appraisedNote"
               name="appraisedNote"
             />
+          </div>
+          <div
+            class="c2"
+          >
+            Please include the date the appraisal was completed
           </div>
         </div>
       </div>
@@ -872,9 +1060,7 @@ exports[`Review Approve Step renders correctly 1`] = `
             class="form-label"
             for="input-confirmation"
           >
-            I, Pims User, confirm by checking this box that I have received the approval 
-  to request the property be submitted to the Enhanced Referral Program and marketed internally to other Ministry 
-  and Broader Public Sector Agencies for 90 days before listing the property to be sold on the public commercial real estate market
+            My Ministry/Agency has approval/authority to submit the Disposal Project to SRES for review.
           </label>
         </div>
       </div>
@@ -971,6 +1157,40 @@ exports[`Review Approve Step renders correctly 1`] = `
         >
           private note
         </textarea>
+      </div>
+    </div>
+    <div
+      class="ProjectNotes form-row"
+    >
+      <div
+        class="col-md-12 reviewRequired form-group col"
+      >
+        <label
+          class="form-label"
+          for="input-notes[22].note"
+        >
+          Add the following text to the ERP Notification Email
+          <svg
+            class="tooltip-icon"
+            fill="currentColor"
+            height="1em"
+            stroke="currentColor"
+            stroke-width="0"
+            viewBox="0 0 512 512"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"
+            />
+          </svg>
+        </label>
+        <textarea
+          class="col-md-5 form-control"
+          disabled=""
+          id="input-notes[22].note"
+          name="notes[22].note"
+        />
       </div>
     </div>
     <div

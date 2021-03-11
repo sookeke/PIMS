@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Tool-Keycloak-Sync",
+      "type": "coreclr",
+      "request": "launch",
+      "console": "internalConsole",
+      "preLaunchTask": "build",
+      "program": "${workspaceRoot}/tools/keycloak/sync/bin/Debug/netcoreapp3.1/Pims.Tools.Keycloak.Sync.dll",
+      "cwd": "${workspaceRoot}/tools/keycloak/sync",
+      "stopAtEntry": false
+    },
+    {
       "name": "Tool-Converter",
       "type": "coreclr",
       "request": "launch",
@@ -15,22 +25,27 @@
       "stopAtEntry": false
     },
     {
+      "name": "Tool-Import",
+      "type": "coreclr",
+      "request": "launch",
+      "console": "internalConsole",
+      "preLaunchTask": "build",
+      "program": "${workspaceRoot}/tools/import/bin/Debug/netcoreapp3.1/Pims.Tools.Import.dll",
+      "cwd": "${workspaceRoot}/tools/import",
+      "stopAtEntry": false
+    },
+    {
       "name": ".NET Core Launch (api)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/backend/bin/Debug/netcoreapp3.1/Pims.Api.dll",
+      "program": "${workspaceFolder}/backend/api/bin/Debug/netcoreapp3.1/Pims.Api.dll",
       "args": [],
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/backend/api",
       "stopAtEntry": false,
-      // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
-      },
       "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Local",
+        "ASPNETCORE_URLS": "http://*:5000;https://*:433"
       },
       "sourceFileMap": {
         "/Views": "${workspaceFolder}/backend/Views"

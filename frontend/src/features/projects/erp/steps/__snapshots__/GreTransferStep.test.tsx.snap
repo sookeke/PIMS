@@ -12,6 +12,39 @@ exports[`GRE Transfer Step renders correctly 1`] = `
   font-family: 'BCSans',Fallback,sans-serif;
 }
 
+.c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c3 .form-group {
+  width: 100%;
+}
+
+.c3 .form-group .rbt {
+  width: 100%;
+}
+
+.c3 .form-group .rbt div input {
+  width: 100% !important;
+}
+
+.c3 .form-group .rbt .rbt-menu {
+  width: 370px !important;
+}
+
 .c2 {
   text-align: center;
   font-family: 'BCSans-Bold';
@@ -60,7 +93,7 @@ exports[`GRE Transfer Step renders correctly 1`] = `
     <div
       className="c2"
     >
-      Transferred within the Greater Revenue Entity
+      Transfer within the Greater Reporting Entity
     </div>
     <div
       className="ProjectDraftForm container-fluid"
@@ -95,6 +128,9 @@ exports[`GRE Transfer Step renders correctly 1`] = `
             name="projectNumber"
             onBlur={[Function]}
             onChange={[Function]}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             placeholder="SPP-XXXXXX"
             value="test-01"
           />
@@ -114,14 +150,93 @@ exports[`GRE Transfer Step renders correctly 1`] = `
           </label>
           <input
             className="col-md-5 form-control"
-            disabled={true}
+            data-testid="project-name"
+            disabled={false}
             id="input-name"
             name="name"
             onBlur={[Function]}
             onChange={[Function]}
-            required={true}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             value="my project"
           />
+        </div>
+      </div>
+      <div
+        className="col-md-10 form-row"
+      >
+        <label
+          className="col-md-1 form-label"
+        >
+          Project Agency
+        </label>
+        <div
+          className="c3 col-md-5 col"
+        >
+          <div
+            className="form-group"
+          >
+            <div
+              className="rbt"
+              style={
+                Object {
+                  "outline": "none",
+                  "position": "relative",
+                }
+              }
+              tabIndex={-1}
+            >
+              <div
+                style={
+                  Object {
+                    "display": "flex",
+                    "flex": 1,
+                    "height": "100%",
+                    "position": "relative",
+                  }
+                }
+              >
+                <input
+                  aria-autocomplete="both"
+                  aria-expanded={false}
+                  aria-haspopup="listbox"
+                  autoComplete="off"
+                  className="rbt-input-main form-control rbt-input"
+                  id="agencyId-field"
+                  name="agencyId"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  role="combobox"
+                  type="text"
+                  value=""
+                />
+                <input
+                  aria-hidden={true}
+                  className="rbt-input-hint"
+                  readOnly={true}
+                  style={
+                    Object {
+                      "backgroundColor": "transparent",
+                      "borderColor": "transparent",
+                      "boxShadow": "none",
+                      "color": "rgba(0, 0, 0, 0.35)",
+                      "left": 0,
+                      "pointerEvents": "none",
+                      "position": "absolute",
+                      "top": 0,
+                      "width": "100%",
+                    }
+                  }
+                  tabIndex={-1}
+                  value=""
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -138,11 +253,15 @@ exports[`GRE Transfer Step renders correctly 1`] = `
           </label>
           <textarea
             className="col-md-auto form-control"
-            disabled={true}
+            data-testid="project-description"
+            disabled={false}
             id="input-description"
             name="description"
             onBlur={[Function]}
             onChange={[Function]}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             value="my project description"
           />
         </div>
@@ -252,7 +371,7 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                 Object {
                   "display": "flex",
                   "flex": "1 0 auto",
-                  "minWidth": "645px",
+                  "minWidth": "790px",
                 }
               }
             >
@@ -277,6 +396,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Agency
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -300,6 +426,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Name
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -323,6 +456,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Civic Address
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -346,6 +486,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Classification
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -369,6 +516,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Current Zoning Code
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -391,7 +545,14 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                 <div
                   className="sortable-column"
                 >
-                  Potential Zoning Code
+                  Other Projects
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -415,6 +576,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Net Book Value
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -438,6 +606,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Market Value
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -460,7 +635,44 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                 <div
                   className="sortable-column"
                 >
-                  Assessed Value
+                  Assessed Land
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
+                </div>
+              </div>
+              <div
+                className="th"
+                colSpan={1}
+                role="columnheader"
+                style={
+                  Object {
+                    "alignItems": "center",
+                    "boxSizing": "border-box",
+                    "display": "flex",
+                    "flex": "145 0 auto",
+                    "justifyContent": "flex-start",
+                    "minWidth": "145px",
+                    "textAlign": "left",
+                    "width": "145px",
+                  }
+                }
+              >
+                <div
+                  className="sortable-column"
+                >
+                  Assessed Building
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -484,6 +696,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   className="sortable-column"
                 >
                   Type
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -502,7 +721,7 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   Object {
                     "display": "flex",
                     "flex": "1 0 auto",
-                    "minWidth": "645px",
+                    "minWidth": "790px",
                   }
                 }
               >
@@ -607,7 +826,7 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                   
                 </div>
                 <div
-                  className="td clickable"
+                  className="td"
                   onClick={[Function]}
                   role="cell"
                   style={
@@ -622,12 +841,38 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                       "width": "100px",
                     }
                   }
+                  title=""
+                >
+                  <div
+                    className="c4"
+                  />
+                </div>
+                <div
+                  className="td clickable"
+                  onClick={[Function]}
+                  role="cell"
+                  style={
+                    Object {
+                      "alignItems": "flex-start",
+                      "boxSizing": "border-box",
+                      "display": "flex",
+                      "flex": "145 0 auto",
+                      "justifyContent": "flex-start",
+                      "minWidth": "145px",
+                      "textAlign": "left",
+                      "width": "145px",
+                    }
+                  }
                   title="Click to view property details"
                 >
-                  
+                  <div
+                    className="form-group"
+                  >
+                    $1
+                  </div>
                 </div>
                 <div
-                  className="td"
+                  className="td clickable"
                   onClick={[Function]}
                   role="cell"
                   style={
@@ -642,12 +887,16 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                       "width": "145px",
                     }
                   }
-                  title=""
+                  title="Click to view property details"
                 >
-                  $1
+                  <div
+                    className="form-group"
+                  >
+                    $0
+                  </div>
                 </div>
                 <div
-                  className="td"
+                  className="td clickable"
                   onClick={[Function]}
                   role="cell"
                   style={
@@ -662,12 +911,16 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                       "width": "145px",
                     }
                   }
-                  title=""
+                  title="Click to view property details"
                 >
-                  $0
+                  <div
+                    className="form-group"
+                  >
+                    $1
+                  </div>
                 </div>
                 <div
-                  className="td"
+                  className="td clickable"
                   onClick={[Function]}
                   role="cell"
                   style={
@@ -682,9 +935,13 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                       "width": "145px",
                     }
                   }
-                  title=""
+                  title="Click to view property details"
                 >
-                  $1
+                  <div
+                    className="form-group"
+                  >
+                    
+                  </div>
                 </div>
                 <div
                   className="td clickable"
@@ -706,7 +963,6 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                 >
                   <svg
                     className="svg"
-                    title="Land"
                   >
                     icon-lot.svg
                   </svg>
@@ -724,7 +980,7 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                 Object {
                   "display": "flex",
                   "flex": "1 0 auto",
-                  "minWidth": "645px",
+                  "minWidth": "790px",
                 }
               }
             >
@@ -837,6 +1093,25 @@ exports[`GRE Transfer Step renders correctly 1`] = `
                     "minWidth": "30px",
                     "textAlign": "left",
                     "width": "100px",
+                  }
+                }
+              >
+                 
+              </div>
+              <div
+                className="th"
+                colSpan={1}
+                role="columnheader"
+                style={
+                  Object {
+                    "alignItems": "center",
+                    "boxSizing": "border-box",
+                    "display": "flex",
+                    "flex": "145 0 auto",
+                    "justifyContent": "flex-start",
+                    "minWidth": "145px",
+                    "textAlign": "left",
+                    "width": "145px",
                   }
                 }
               >
@@ -945,6 +1220,9 @@ exports[`GRE Transfer Step renders correctly 1`] = `
           name="note"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
           value="my notes"
         />
       </div>
@@ -991,6 +1269,9 @@ exports[`GRE Transfer Step renders correctly 1`] = `
           name="publicNote"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
           value="public note"
         />
       </div>
@@ -1037,6 +1318,9 @@ exports[`GRE Transfer Step renders correctly 1`] = `
           name="privateNote"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
           value="private note"
         />
       </div>

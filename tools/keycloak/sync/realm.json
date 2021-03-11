@@ -91,7 +91,12 @@
       },
       {
         "Name": "reports-spl",
-        "Description": "Ability to view SPL report.",
+        "Description": "Ability to view, create, and modify SPL non-final reports.",
+        "Composite": false
+      },
+      {
+        "Name": "reports-spl-admin",
+        "Description": "Ability to view, create, and delete Final reports.",
         "Composite": false
       },
       {
@@ -138,8 +143,7 @@
           "sensitive-view",
           "project-add",
           "project-edit",
-          "project-view",
-          "property-delete"
+          "project-view"
         ]
       },
       {
@@ -151,8 +155,7 @@
           "sensitive-view",
           "project-add",
           "project-edit",
-          "project-view",
-          "property-delete"
+          "project-view"
         ]
       },
       {
@@ -164,8 +167,7 @@
           "sensitive-view",
           "project-add",
           "project-edit",
-          "project-view",
-          "property-delete"
+          "project-view"
         ]
       },
       {
@@ -177,8 +179,7 @@
           "sensitive-view",
           "project-add",
           "project-edit",
-          "project-view",
-          "property-delete"
+          "project-view"
         ]
       },
       {
@@ -192,8 +193,7 @@
           "sensitive-view",
           "project-add",
           "project-edit",
-          "project-view",
-          "property-delete"
+          "project-view"
         ]
       },
       {
@@ -212,6 +212,10 @@
       },
       {
         "Name": "SRES Financial Manager",
+        "RealmRoles": ["reports-view", "reports-spl", "reports-spl-admin"]
+      },
+      {
+        "Name": "SRES Financial Reporter",
         "RealmRoles": ["reports-view", "reports-spl"]
       }
     ],
@@ -250,9 +254,15 @@
         "DirectAccessGrantsEnabled": true,
         "AuthorizationServicesEnabled": false,
         "RootUrl": "https://pims.gov.bc.ca",
-        "RedirectUris": ["https://pims.gov.bc.ca/*"],
+        "RedirectUris": [
+          "https://pims.gov.bc.ca/*",
+          "https://pims.apps.silver.devops.gov.bc.ca/*"
+        ],
         "BaseUrl": "/",
-        "WebOrigins": ["https://pims.gov.bc.ca"],
+        "WebOrigins": [
+          "https://pims.gov.bc.ca",
+          "https://pims.apps.silver.devops.gov.bc.ca"
+        ],
         "ProtocolMappers": [
           {
             "Name": "agencies",
@@ -440,11 +450,21 @@
         "ServiceAccountsEnabled": true,
         "AuthorizationServicesEnabled": false,
         "RootUrl": "https://pims.gov.bc.ca/api",
-        "RedirectUris": ["https://pims.gov.bc.ca/api/*"],
+        "RedirectUris": [
+          "https://pims.gov.bc.ca/api/*",
+          "https://pims.apps.silver.devops.gov.bc.ca/api/*"
+        ],
         "BaseUrl": "/",
-        "WebOrigins": ["*"],
+        "WebOrigins": [
+          "https://pims.gov.bc.ca",
+          "https://pims.apps.silver.devops.gov.bc.ca"
+        ],
         "ServiceAccount": {
-          "RealmRoles": ["system-administrator", "reports-spl"],
+          "RealmRoles": [
+            "system-administrator",
+            "reports-spl",
+            "reports-spl-admin"
+          ],
           "ClientRoles": [
             {
               "ClientId": "realm-management",
@@ -472,9 +492,15 @@
         "ServiceAccountsEnabled": true,
         "AuthorizationServicesEnabled": true,
         "RootUrl": "https://pims.gov.bc.ca/api",
-        "RedirectUris": ["https://pims.gov.bc.ca/api/*"],
+        "RedirectUris": [
+          "https://pims.gov.bc.ca/api/*",
+          "https://pims.apps.silver.devops.gov.bc.ca/api/*"
+        ],
         "BaseUrl": "/",
-        "WebOrigins": ["*"],
+        "WebOrigins": [
+          "https://pims.gov.bc.ca",
+          "https://pims.apps.silver.devops.gov.bc.ca"
+        ],
         "ProtocolMappers": [
           {
             "Name": "agencies",

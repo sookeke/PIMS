@@ -12,6 +12,7 @@ interface IAppraisalCheckListFormProps {
   isReadOnly?: boolean;
   taskStatusCode?: string;
 }
+
 /**
  * Displays a checklist for every task within the AppraisalReview status.
  * @param props
@@ -33,7 +34,8 @@ const AppraisalCheckListForm: React.FunctionComponent<IAppraisalCheckListFormPro
           className="col-md-auto"
           outerClassName="col-md-12 reviewRequired"
           field="appraisedNote"
-          label="Note"
+          label="Appraisal Notes"
+          comment="Please include the date the appraisal was completed"
         />
       </Col>
     </Row>

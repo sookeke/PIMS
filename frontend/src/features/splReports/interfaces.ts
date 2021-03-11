@@ -1,3 +1,4 @@
+import { TableSort } from 'components/Table/TableSort';
 import { IProject } from './../projects/common/interfaces';
 export interface IReport {
   id?: number;
@@ -9,6 +10,7 @@ export interface IReport {
 }
 
 export interface ISnapshot {
+  id?: number;
   projectId: number;
   project?: IProject;
   snapshotOn: string;
@@ -23,4 +25,11 @@ export interface ISnapshot {
   ocgFinancialStatement: number;
   interestComponent: number;
   salesWithLeaseInPlace: boolean;
+}
+
+export interface ISnapshotFilter {
+  projectNumber?: string;
+  agency?: number | string;
+  fiscalYear?: string;
+  sortBy: TableSort<any>;
 }

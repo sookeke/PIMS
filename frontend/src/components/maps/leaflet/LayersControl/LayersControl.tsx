@@ -7,6 +7,8 @@ import clsx from 'classnames';
 import LayersTree from './LayersTree';
 import * as L from 'leaflet';
 import { useEffect } from 'react';
+import TooltipWrapper from 'components/common/TooltipWrapper';
+import variables from '_variables.module.scss';
 
 const LayersContainer = styled.div`
   margin-right: -10px;
@@ -29,7 +31,7 @@ const LayersContainer = styled.div`
 const LayersHeader = styled.div`
   width: 100%;
   height: 80px;
-  background-color: #1a5a96;
+  background-color: ${variables.slideOutBlue};
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -69,8 +71,8 @@ const ControlButton = styled(Button)`
   top: 0;
   left: -51px;
   background-color: #fff;
-  color: #1a5a96;
-  border-color: #1a5a96;
+  color: ${variables.slideOutBlue};
+  border-color: ${variables.slideOutBlue};
   box-shadow: -2px 1px 4px rgba(0, 0, 0, 0.2);
   &.open {
     border-top-right-radius: 0;
@@ -79,13 +81,18 @@ const ControlButton = styled(Button)`
   }
 `;
 
+export type ILayersControl = {
+  /** whether the slide out is open or closed */
+  open: boolean;
+  /** set the slide out as open or closed */
+  setOpen: () => void;
+};
+
 /**
  * Component to display the layers control on the map
  * @example ./LayersControl.md
  */
-const LayersControl: React.FC = () => {
-  const [open, setOpen] = React.useState<boolean>(false);
-
+const LayersControl: React.FC<ILayersControl> = ({ open, setOpen }) => {
   useEffect(() => {
     const elem = L.DomUtil.get('layersContainer');
     if (elem) {
@@ -102,14 +109,16 @@ const LayersControl: React.FC = () => {
             <Title>Layers</Title>
           </LayersHeader>
         )}
-        <ControlButton
-          id="layersControlButton"
-          variant="outline-secondary"
-          onClick={() => setOpen(!open)}
-          className={clsx({ open })}
-        >
-          <LayersIcon />
-        </ControlButton>
+        <TooltipWrapper toolTipId="layer-control-id" toolTip="Layer Controls">
+          <ControlButton
+            id="layersControlButton"
+            variant="outline-secondary"
+            onClick={setOpen}
+            className={clsx({ open })}
+          >
+            <LayersIcon />
+          </ControlButton>
+        </TooltipWrapper>
         <LayersContent className={clsx({ open })}>
           <LayersTree />
         </LayersContent>

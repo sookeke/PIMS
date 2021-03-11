@@ -1,6 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Update Info Form Matches Snapshot 1`] = `
+.c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+}
+
 .c0 {
   padding-left: 10px;
 }
@@ -76,6 +86,24 @@ exports[`Update Info Form Matches Snapshot 1`] = `
       >
         Financial Information
       </h3>
+    </div>
+    <div
+      className="form-row"
+    >
+      <h6
+        className="col-md-12"
+        style={
+          Object {
+            "margin": "0 0 1rem 0",
+          }
+        }
+      >
+        These values are for the 
+        <strong>
+          project
+        </strong>
+        , not the individual properties.
+      </h6>
     </div>
     <div
       className="form-row"
@@ -263,7 +291,7 @@ exports[`Update Info Form Matches Snapshot 1`] = `
           }
         }
       >
-        Please make any necessary updates to the valuation information and the classification.
+        Please update  the property classification.
       </h6>
       <h2
         className="col-md-5"
@@ -316,7 +344,7 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                 Object {
                   "display": "flex",
                   "flex": "1 0 auto",
-                  "minWidth": "705px",
+                  "minWidth": "850px",
                 }
               }
             >
@@ -343,16 +371,25 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   <div>
                     <input
                       checked={false}
+                      data-testid="selectrow-parent"
+                      disabled={true}
                       onChange={[Function]}
                       style={
                         Object {
                           "cursor": "pointer",
                         }
                       }
-                      title="Toggle All Rows Selected"
+                      title="Click to deselect all properties."
                       type="checkbox"
                     />
                   </div>
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -376,6 +413,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -399,6 +443,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Agency
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -422,6 +473,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Name
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -445,6 +503,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Civic Address
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -468,6 +533,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Classification
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -491,6 +563,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Current Zoning Code
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -513,7 +592,14 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                 <div
                   className="sortable-column"
                 >
-                  Potential Zoning Code
+                  Other Projects
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -537,6 +623,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Net Book Value
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -560,6 +653,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Market Value
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -582,7 +682,44 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                 <div
                   className="sortable-column"
                 >
-                  Assessed Value
+                  Assessed Land
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
+                </div>
+              </div>
+              <div
+                className="th"
+                colSpan={1}
+                role="columnheader"
+                style={
+                  Object {
+                    "alignItems": "center",
+                    "boxSizing": "border-box",
+                    "display": "flex",
+                    "flex": "145 0 auto",
+                    "justifyContent": "flex-start",
+                    "minWidth": "145px",
+                    "textAlign": "left",
+                    "width": "145px",
+                  }
+                }
+              >
+                <div
+                  className="sortable-column"
+                >
+                  Assessed Building
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
               <div
@@ -606,6 +743,13 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   className="sortable-column"
                 >
                   Type
+                  <span
+                    style={
+                      Object {
+                        "flex": "1 1 auto",
+                      }
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -624,7 +768,7 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   Object {
                     "display": "flex",
                     "flex": "1 0 auto",
-                    "minWidth": "705px",
+                    "minWidth": "850px",
                   }
                 }
               >
@@ -649,6 +793,8 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   <div>
                     <input
                       checked={false}
+                      data-testid="selectrow-1"
+                      disabled={false}
                       onChange={[Function]}
                       style={
                         Object {
@@ -788,7 +934,11 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                       className="form-control"
                       id="input-properties.0.classificationId-fast"
                       name="properties.0.classificationId"
+                      onBlur={[Function]}
                       onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                       type="number"
                       value={0}
                     >
@@ -826,6 +976,9 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                       name="properties.0.zoning"
                       onBlur={[Function]}
                       onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                       value=""
                     />
                   </div>
@@ -849,17 +1002,8 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   title=""
                 >
                   <div
-                    className="form-group col"
-                  >
-                    <input
-                      className="form-control"
-                      id="input-properties.0.zoningPotential"
-                      name="properties.0.zoningPotential"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      value=""
-                    />
-                  </div>
+                    className="c1"
+                  />
                 </div>
                 <div
                   className="td"
@@ -879,22 +1023,14 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   }
                   title=""
                 >
-                  <div
-                    className="form-group col"
+                  <i
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
                   >
-                    <div
-                      className="input-tooltip-wrapper"
-                    >
-                      <input
-                        className="form-control input-number"
-                        name="properties.0.netBook"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        placeholder=""
-                        value={1}
-                      />
-                    </div>
-                  </div>
+                    $1
+                  </i>
                 </div>
                 <div
                   className="td"
@@ -914,25 +1050,17 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                   }
                   title=""
                 >
-                  <div
-                    className="form-group col"
+                  <i
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
                   >
-                    <div
-                      className="input-tooltip-wrapper"
-                    >
-                      <input
-                        className="form-control input-number"
-                        name="properties.0.market"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        placeholder=""
-                        value={0}
-                      />
-                    </div>
-                  </div>
+                    $0
+                  </i>
                 </div>
                 <div
-                  className="td"
+                  className="td clickable"
                   onClick={[Function]}
                   role="cell"
                   style={
@@ -947,23 +1075,36 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                       "width": "145px",
                     }
                   }
-                  title=""
+                  title="Click to view property details"
                 >
                   <div
-                    className="form-group col"
+                    className="form-group"
                   >
-                    <div
-                      className="input-tooltip-wrapper"
-                    >
-                      <input
-                        className="form-control input-number"
-                        name="properties.0.assessed"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        placeholder=""
-                        value={1}
-                      />
-                    </div>
+                    
+                  </div>
+                </div>
+                <div
+                  className="td clickable"
+                  onClick={[Function]}
+                  role="cell"
+                  style={
+                    Object {
+                      "alignItems": "flex-start",
+                      "boxSizing": "border-box",
+                      "display": "flex",
+                      "flex": "145 0 auto",
+                      "justifyContent": "flex-start",
+                      "minWidth": "145px",
+                      "textAlign": "left",
+                      "width": "145px",
+                    }
+                  }
+                  title="Click to view property details"
+                >
+                  <div
+                    className="form-group"
+                  >
+                    
                   </div>
                 </div>
                 <div
@@ -986,7 +1127,6 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                 >
                   <svg
                     className="svg"
-                    title="Land"
                   >
                     icon-lot.svg
                   </svg>
@@ -1004,7 +1144,7 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                 Object {
                   "display": "flex",
                   "flex": "1 0 auto",
-                  "minWidth": "705px",
+                  "minWidth": "850px",
                 }
               }
             >
@@ -1155,6 +1295,25 @@ exports[`Update Info Form Matches Snapshot 1`] = `
                     "minWidth": "30px",
                     "textAlign": "left",
                     "width": "100px",
+                  }
+                }
+              >
+                 
+              </div>
+              <div
+                className="th"
+                colSpan={1}
+                role="columnheader"
+                style={
+                  Object {
+                    "alignItems": "center",
+                    "boxSizing": "border-box",
+                    "display": "flex",
+                    "flex": "145 0 auto",
+                    "justifyContent": "flex-start",
+                    "minWidth": "145px",
+                    "textAlign": "left",
+                    "width": "145px",
                   }
                 }
               >

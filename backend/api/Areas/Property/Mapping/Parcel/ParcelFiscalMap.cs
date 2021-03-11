@@ -13,16 +13,17 @@ namespace Pims.Api.Areas.Property.Mapping.Parcel
                 .EnumMappingStrategy(EnumMappingStrategy.ByName)
                 .Map(dest => dest.ParcelId, src => src.ParcelId)
                 .Map(dest => dest.FiscalYear, src => src.FiscalYear)
+                .Map(dest => dest.EffectiveDate, src => src.EffectiveDate)
                 .Map(dest => dest.Key, src => src.Key)
                 .Map(dest => dest.Value, src => src.Value)
                 .Map(dest => dest.Note, src => src.Note)
                 .Inherits<Entity.BaseEntity, BModel.BaseModel>();
 
-
             config.NewConfig<Model.ParcelFiscalModel, Entity.ParcelFiscal>()
                 .EnumMappingStrategy(EnumMappingStrategy.ByName)
                 .Map(dest => dest.ParcelId, src => src.ParcelId)
                 .Map(dest => dest.FiscalYear, src => src.FiscalYear)
+                .Map(dest => dest.EffectiveDate, src => src.EffectiveDate)
                 .Map(dest => dest.Key, src => src.Key)
                 .Map(dest => dest.Value, src => src.Value)
                 .Map(dest => dest.Note, src => src.Note)

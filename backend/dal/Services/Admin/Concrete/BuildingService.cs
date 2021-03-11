@@ -90,16 +90,17 @@ namespace Pims.Dal.Services.Admin
                 .Include(p => p.BuildingOccupantType)
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Agency).ThenInclude(a => a.Parent)
-                .AsNoTracking()
                 .Where(b => b.Parcels.Any(pb => pb.Parcel.PID == pid) && (name == null || EF.Functions.Like(b.Name, $"{name}%")));
         }
 
         /// <summary>
-        /// Get the building for the specified 'name'.
+        /// Get the building for the specified 'pid' and 'name'.
+        /// This searched for a name that begins the same.
         /// </summary>
+        /// <param name="pid"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public Building GetByName(string name)
+        public IEnumerable<Building> GetByPidWithoutTracking(int pid, string name = null)
         {
             this.User.ThrowIfNotAuthorized(Permissions.SystemAdmin, Permissions.AgencyAdmin);
 
@@ -109,7 +110,62 @@ namespace Pims.Dal.Services.Admin
                 .Include(p => p.BuildingOccupantType)
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Agency).ThenInclude(a => a.Parent)
-                .AsNoTracking().SingleOrDefault(b => b.Name == name) ?? throw new KeyNotFoundException();
+                .AsNoTracking().Where(b => b.Parcels.Any(pb => pb.Parcel.PID == pid) && (name == null || EF.Functions.Like(b.Name, $"{name}%")));
+        }
+
+        /// <summary>
+        /// Get the building for the specified 'name'.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public IEnumerable<Building> GetByName(string name)
+        {
+            this.User.ThrowIfNotAuthorized(Permissions.SystemAdmin, Permissions.AgencyAdmin);
+
+            return this.Context.Buildings
+                .Include(p => p.BuildingConstructionType)
+                .Include(p => p.BuildingPredominateUse)
+                .Include(p => p.BuildingOccupantType)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Agency).ThenInclude(a => a.Parent)
+                .Where(b => b.Name == name) ?? throw new KeyNotFoundException();
+        }
+
+        /// <summary>
+        /// Get the building for the specified 'name'.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public IEnumerable<Building> GetByNameWithoutTracking(string name)
+        {
+            this.User.ThrowIfNotAuthorized(Permissions.SystemAdmin, Permissions.AgencyAdmin);
+
+            return this.Context.Buildings
+                .Include(p => p.BuildingConstructionType)
+                .Include(p => p.BuildingPredominateUse)
+                .Include(p => p.BuildingOccupantType)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Agency).ThenInclude(a => a.Parent)
+                .AsNoTracking().Where(b => b.Name == name) ?? throw new KeyNotFoundException();
+        }
+
+        /// <summary>
+        /// Load the parcels for the specified building.
+        /// </summary>
+        /// <param name="building"></param>
+        public void LoadParcelsFor(Building building)
+        {
+            var entry = this.Context.Entry(building);
+
+            if (entry.State == EntityState.Detached)
+            {
+                entry.State = EntityState.Unchanged;
+            }
+
+            entry.Collection(b => b.Parcels)
+                .Query()
+                .Include(pb => pb.Parcel)
+                .Load();
         }
 
         /// <summary>
@@ -133,6 +189,7 @@ namespace Pims.Dal.Services.Admin
             if (building.BuildingOccupantType != null && !this.Context.BuildingOccupantTypes.Local.Any(a => a.Id == building.BuildingOccupantTypeId))
                 this.Context.Entry(building.BuildingOccupantType).State = EntityState.Unchanged;
 
+            building.PropertyTypeId = (int)PropertyTypes.Building;
             building.Agency = this.Context.Agencies.Local.FirstOrDefault(a => a.Id == building.AgencyId);
             building.Classification = this.Context.PropertyClassifications.Local.FirstOrDefault(a => a.Id == building.ClassificationId);
             building.BuildingConstructionType = this.Context.BuildingConstructionTypes.Local.FirstOrDefault(a => a.Id == building.BuildingConstructionTypeId);
@@ -164,6 +221,7 @@ namespace Pims.Dal.Services.Admin
             var userId = this.User.GetUserId();
             buildings.ForEach((building) =>
             {
+                building.PropertyTypeId = (int)PropertyTypes.Building;
                 if (building.Agency != null && !this.Context.Agencies.Local.Any(a => a.Id == building.BuildingOccupantTypeId))
                     this.Context.Entry(building.Agency).State = EntityState.Unchanged;
                 if (building.Classification != null && !this.Context.PropertyClassifications.Local.Any(a => a.Id == building.ClassificationId))
@@ -204,6 +262,7 @@ namespace Pims.Dal.Services.Admin
                 .FirstOrDefault(b => b.Id == building.Id) ?? throw new KeyNotFoundException();
             this.ThrowIfNotAllowedToUpdate(originalBuilding, _options.Project);
 
+            building.PropertyTypeId = originalBuilding.PropertyTypeId;
             var entry = this.Context.Entry(originalBuilding);
             entry.CurrentValues.SetValues(building);
             entry.Collection(p => p.Evaluations).Load();
@@ -278,8 +337,18 @@ namespace Pims.Dal.Services.Admin
             building.ThrowIfNotAllowedToEdit(nameof(building), this.User, new[] { Permissions.SystemAdmin, Permissions.AgencyAdmin });
 
             var originalBuilding = this.Context.Buildings.Find(building.Id) ?? throw new KeyNotFoundException();
+            this.Context.Entry(originalBuilding).Collection(p => p.Parcels).Load();
+            this.Context.Entry(originalBuilding).Collection(p => p.Evaluations).Load();
+            this.Context.Entry(originalBuilding).Collection(p => p.Fiscals).Load();
+            this.Context.Entry(originalBuilding).Collection(p => p.Projects).Load();
 
             this.Context.Entry(originalBuilding).CurrentValues.SetValues(building);
+            originalBuilding.Parcels.Clear();
+            originalBuilding.Evaluations.Clear();
+            originalBuilding.Fiscals.Clear();
+            originalBuilding.Projects.Clear();
+            // this.Context.BuildingEvaluations.RemoveRange(originalBuilding.Evaluations);
+            // this.Context.BuildingFiscals.RemoveRange(originalBuilding.Fiscals);
             base.Remove(originalBuilding);
         }
         #endregion

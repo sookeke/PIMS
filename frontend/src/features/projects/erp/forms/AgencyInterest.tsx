@@ -1,16 +1,13 @@
 import { AgencyResponses, FormikTable, IProject } from '../../common';
 import { getIn, useFormikContext } from 'formik';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'reducers/rootReducer';
 import { ILookupCode } from 'actions/lookupActions';
-import { ILookupCodeState } from 'reducers/lookupCodeReducer';
-import _ from 'lodash';
 import * as API from 'constants/API';
 import { ParentSelect } from 'components/common/form/ParentSelect';
 import { mapLookupCodeWithParentString } from 'utils';
 import { Button, Col, Row } from 'react-bootstrap';
 import { AgencyInterestColumns } from './AgencyInterestColumns';
+import useCodeLookups from 'hooks/useLookupCodes';
 
 export interface IAgencyInterestProps {
   /** Whether the controls are disabled. */
@@ -24,21 +21,15 @@ export interface IAgencyInterestProps {
 export const AgencyInterest = ({ disabled = false }: IAgencyInterestProps) => {
   const { values, setValues, setFieldValue } = useFormikContext<IProject>();
   const [enableAdd, setEnableAdd] = React.useState(false);
+  const lookupCodes = useCodeLookups();
 
-  const lookupCodes = useSelector<RootState, ILookupCode[]>(
-    state => (state.lookupCode as ILookupCodeState).lookupCodes,
-  );
-  const agencies = _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-    return lookupCode.type === API.AGENCY_CODE_SET_NAME;
-  });
+  const agencies = lookupCodes.getByType(API.AGENCY_CODE_SET_NAME);
   const agencyOptions = (agencies ?? []).map(c => mapLookupCodeWithParentString(c, agencies));
 
   const onAddAgency = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     event.preventDefault();
     const selectedAgency = getIn(values, 'addAgencyResponse');
-    const agency = agencies.find(
-      a => ((a.id as unknown) as number) === parseInt(selectedAgency?.value),
-    );
+    const agency = agencies.find(a => ((a.id as unknown) as number) === parseInt(selectedAgency));
     if (agency !== undefined) {
       const project = addAgency({
         project: values,
@@ -68,22 +59,25 @@ export const AgencyInterest = ({ disabled = false }: IAgencyInterestProps) => {
   return (
     <>
       <h3>Agency Interest</h3>
-      <Row>
-        <Col md={5}>
-          <ParentSelect
-            field="addAgencyResponse"
-            options={agencyOptions}
-            filterBy={['code', 'label', 'parent']}
-            placeholder="Enter an Agency"
-            onChange={onAgencySelected}
-          />
-        </Col>
-        <Col>
-          <Button onClick={onAddAgency} disabled={!enableAdd}>
-            Add
-          </Button>
-        </Col>
-      </Row>
+      {disabled ? null : (
+        <Row>
+          <Col md={5}>
+            <ParentSelect
+              field="addAgencyResponse"
+              options={agencyOptions}
+              filterBy={['code', 'label', 'parent']}
+              placeholder="Enter an Agency"
+              disabled={disabled}
+              onChange={onAgencySelected}
+            />
+          </Col>
+          <Col>
+            <Button onClick={onAddAgency} disabled={!enableAdd}>
+              Add
+            </Button>
+          </Col>
+        </Row>
+      )}
       <Row>
         <Col>
           <FormikTable

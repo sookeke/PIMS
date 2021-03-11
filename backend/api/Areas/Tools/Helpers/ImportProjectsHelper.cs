@@ -29,6 +29,12 @@ namespace Pims.Api.Areas.Tools.Helpers
         private readonly IList<Entity.Agency> _agencies;
         private readonly IList<Entity.TierLevel> _tiers;
         private readonly JsonSerializerOptions _serializerOptions;
+
+        /// <summary>
+        /// An array of project status for marketed and beyond.
+        /// </summary>
+        /// <value></value>
+        private static readonly string[] marketed = new[] { "SPL-M", "SPL-CIP-U", "SPL-CIP-C", "DIS" };
         #endregion
 
         #region Constructors
@@ -116,7 +122,7 @@ namespace Pims.Api.Areas.Tools.Helpers
 
                     var prop = props.FirstOrDefault(p => String.Compare(p.Name, keyValue[0], true) == 0);
                     var modelValue = prop?.GetValue(model);
-                    if (prop != null && modelValue == null || modelValue.Equals(prop.PropertyType.GetDefault()))
+                    if (prop != null && modelValue == null || modelValue?.Equals(prop.PropertyType.GetDefault()) == true)
                     {
                         if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
                         {
@@ -157,14 +163,17 @@ namespace Pims.Api.Areas.Tools.Helpers
                 "Contract in Place" => GetWorkflow("SPL"),
                 "On Market" => GetWorkflow("SPL"),
                 "Pre-Market" => GetWorkflow("SPL"),
-                _ => _adminService.Workflow.GetForStatus(model.Status).OrderBy(w => w.SortOrder).Last()
+                "Not In Spl" => GetWorkflow("SPL"),
+                _ => status.Code == "AP-!SPL"
+                    ? _adminService.Workflow.Get(_workflows.FirstOrDefault(w => w.Code == "ERP").Id)
+                    : _adminService.Workflow.GetForStatus(model.Status).OrderBy(w => w.SortOrder).Last()
             };
 
             project ??= new Entity.Project();
 
             project.ProjectNumber = String.IsNullOrWhiteSpace(model.ProjectNumber) ? $"TEMP-{DateTime.UtcNow.Ticks:00000}" : model.ProjectNumber;
             project.Name = model.Description.Truncate(100);
-            project.Description = model.Description;
+            project.Description = model.Description + (String.IsNullOrWhiteSpace(model.Location) ? null : Environment.NewLine + model.Location);
             project.Manager = model.Manager;
             project.ActualFiscalYear = model.ActualFiscalYear;
             project.ReportedFiscalYear = model.ReportedFiscalYear;
@@ -179,37 +188,7 @@ namespace Pims.Api.Areas.Tools.Helpers
             // Extract properties from PID note.
             var pidNote = model.Notes?.FirstOrDefault(n => n.Key == "PID").Value;
             var pids = Regex.Matches(pidNote ?? "", "[0-9]{3}-[0-9]{3}-[0-9]{3}").Select(m => m.Value).NotNull().Distinct();
-            if (!String.IsNullOrWhiteSpace(pidNote))
-            {
-                // Need to load any properties currently linked to this project.
-                if (project.Id > 0)
-                {
-                    var existingProject = _service.Project.Get(project.ProjectNumber);
-
-                    pids.ForEach(pid =>
-                    {
-                        // If the parcel has not already been added, add it to the project.
-                        var addProperty = true;
-                        foreach (var property in existingProject.Properties.Where(p => p.PropertyType == Entity.PropertyTypes.Land))
-                        {
-                            var parcel = _service.Parcel.Get(property.ParcelId.Value);
-                            if (parcel.ParcelIdentity == pid)
-                            {
-                                addProperty = false;
-                                break;
-                            }
-                        }
-                        if (addProperty) AddProperty(project, pid);
-                    });
-
-                }
-                else
-                {
-                    pids.ForEach(pid => AddProperty(project, pid));
-                }
-            }
-
-            project.TierLevel = GetTier(model.Market, pids.Any() ? pids.Count() : project.Properties.Count()); // Most projects have no properties linked.
+            project.TierLevel = GetTier(model.Market, project.Properties.Any() ? project.Properties.Count() : pids.Count()); // Most projects have no properties linked.
             project.TierLevelId = project.TierLevel.Id;
             project.Risk = GetRisk(model.Risk);
             project.RiskId = project.Risk.Id;
@@ -236,20 +215,21 @@ namespace Pims.Api.Areas.Tools.Helpers
 
             var metadata = new Entity.Models.DisposalProjectSnapshotMetadata
             {
-                InitialNotificationSentOn = null, // Don't have a source for this information.
+                InitialNotificationSentOn = model.InitialNotificationSentOn,
                 ThirtyDayNotificationSentOn = null, // Don't have a source for this information.
                 SixtyDayNotificationSentOn = null, // Don't have a source for this information.
                 NinetyDayNotificationSentOn = null, // Don't have a source for this information.
                 OnHoldNotificationSentOn = null, // Don't have a source for this information.
                 InterestedReceivedOn = model.InterestedReceivedOn,
                 TransferredWithinGreOn = null, // Don't have a source for this information.
-                ClearanceNotificationSentOn = null, // Don't have a source for this information.
-                RequestForSplReceivedOn = model.RequestForSplReceivedOn, // Don't have a source for this information.
+                ClearanceNotificationSentOn = model.ClearanceNotificationSentOn,
+                RequestForSplReceivedOn = model.RequestForSplReceivedOn,
                 ApprovedForSplOn = model.ApprovedForSplOn,
-                MarketedOn = model.MarketedOn,
+                MarketedOn = marketed.Contains(project.Status.Code) ? model.MarketedOn : null, // Only assign the marketed on date if the project is in an appropriate status.
                 Purchaser = model.Purchaser,
                 OcgFinancialStatement = model.OcgFinancialStatement,
                 AppraisedBy = model.AppraisedBy,
+                AppraisedOn = model.AppraisedOn,
                 ProgramCost = model.ProgramCost,
                 SalesCost = model.SalesCost,
                 InterestComponent = model.InterestComponent,
@@ -258,12 +238,14 @@ namespace Pims.Api.Areas.Tools.Helpers
                 SaleWithLeaseInPlace = model.SaleWithLeaseInPlace,
                 DisposedOn = model.DisposedOn ?? (project.Status.Code == "DIS" ? model.CompletedOn : null),
                 OfferAmount = project.Status.Code == "DIS" ? model.Market : (decimal?)null, // This value would only be accurate if the property is disposed.
-                OfferAcceptedOn = null// Don't have a source for this information.
+                OfferAcceptedOn = null, // Don't have a source for this information.
+                ExemptionRequested = model.ExemptionRequested
             };
 
             // A prior net proceeds was provided, which means a prior snapshot needs to be generated.
             // If the project already exists, don't add prior snapshots.
-            if (model.PriorNetProceeds.HasValue && project.Id == 0)
+            // Only create snapshots if a `snapshotOn` date has been provided.
+            if (model.PriorNetProceeds.HasValue && project.Id == 0 && model.SnapshotOn.HasValue)
             {
                 AddSnapshot(project, model, metadata);
             }
@@ -345,13 +327,13 @@ namespace Pims.Api.Areas.Tools.Helpers
                     if (projectProperty.PropertyType == Entity.PropertyTypes.Land)
                     {
                         var parcel = _adminService.Parcel.Find(projectProperty.ParcelId);
-                        parcel.ProjectNumber = project.ProjectNumber;
+                        parcel.UpdateProjectNumbers(project.ProjectNumber);
                         _adminService.Parcel.Update(parcel);
                     }
                     else
                     {
                         var building = _adminService.Building.Find(projectProperty.BuildingId);
-                        building.ProjectNumber = project.ProjectNumber;
+                        building.UpdateProjectNumbers(project.ProjectNumber);
                         _adminService.Building.Update(building);
                     }
                 }

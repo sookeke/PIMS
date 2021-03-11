@@ -2,27 +2,19 @@ import React, { useState, useRef } from 'react';
 import Map, { MapViewportChangeEvent } from '../../../components/maps/leaflet/Map';
 import './MapView.scss';
 import { Map as LeafletMap } from 'react-leaflet';
-import { fetchPropertyDetail } from 'actionCreators/parcelsActionCreator';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers/rootReducer';
-import {
-  IProperty,
-  storeParcelDetail,
-  IPropertyDetail,
-  PropertyTypes,
-} from 'actions/parcelsActions';
-import { ILookupCodeState } from 'reducers/lookupCodeReducer';
-import { ILookupCode } from 'actions/lookupActions';
+import { IProperty, storeParcelDetail, IPropertyDetail } from 'actions/parcelsActions';
 import { LeafletMouseEvent } from 'leaflet';
 import useParamSideBar from '../../mapSideBar/hooks/useQueryParamSideBar';
 import { saveClickLatLng as saveLeafletMouseEvent } from 'reducers/LeafletMouseSlice';
 import * as API from 'constants/API';
-import _ from 'lodash';
 import MapSideBarContainer from 'features/mapSideBar/containers/MapSideBarContainer';
 import classNames from 'classnames';
 import { FilterProvider } from 'components/maps/providers/FIlterProvider';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import useCodeLookups from 'hooks/useLookupCodes';
 
 /** rough center of bc Itcha Ilgachuz Provincial Park */
 const defaultLatLng = {
@@ -45,28 +37,15 @@ interface MapViewProps {
 }
 
 const MapView: React.FC<MapViewProps> = (props: MapViewProps) => {
-  const properties = useSelector<RootState, IProperty[]>(state => [
-    ...state.parcel.parcels,
-    ...state.parcel.draftParcels,
-  ]);
+  const lookupCodes = useCodeLookups();
+  const properties = useSelector<RootState, IProperty[]>(state => [...state.parcel.parcels]);
   const [loadedProperties, setLoadedProperties] = useState(false);
   const mapRef = useRef<LeafletMap>(null);
   const propertyDetail = useSelector<RootState, IPropertyDetail | null>(
     state => state.parcel.parcelDetail,
   );
-  const lookupCodes = useSelector<RootState, ILookupCode[]>(
-    state => (state.lookupCode as ILookupCodeState).lookupCodes,
-  );
-  const agencies = _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-    return lookupCode.type === API.AGENCY_CODE_SET_NAME;
-  });
-  const propertyClassifications = _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-    return lookupCode.type === API.PROPERTY_CLASSIFICATION_CODE_SET_NAME && !!lookupCode.isVisible;
-  });
-  const administrativeAreas = _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-    return lookupCode.type === API.AMINISTRATIVE_AREA_CODE_SET_NAME;
-  });
-  const [selectedDraftProperty, setSelectedDraftProperty] = useState<IPropertyDetail | null>(null);
+  const agencies = lookupCodes.getByType(API.AGENCY_CODE_SET_NAME);
+  const administrativeAreas = lookupCodes.getByType(API.AMINISTRATIVE_AREA_CODE_SET_NAME);
 
   const lotSizes = fetchLotSizes();
   const dispatch = useDispatch();
@@ -77,7 +56,7 @@ const MapView: React.FC<MapViewProps> = (props: MapViewProps) => {
     }
   };
 
-  const { showSideBar } = useParamSideBar();
+  const { showSideBar, size } = useParamSideBar();
 
   const location = useLocation();
   const urlParsed = queryString.parse(location.search);
@@ -89,45 +68,18 @@ const MapView: React.FC<MapViewProps> = (props: MapViewProps) => {
           mapRef.current?.leafletElement.fireEvent('clear');
         }}
         properties={properties}
-      ></MapSideBarContainer>
+      />
       <FilterProvider>
         <Map
-          lat={
-            (propertyDetail?.parcelDetail?.latitude as number) ??
-            selectedDraftProperty?.parcelDetail?.latitude ??
-            defaultLatLng.lat
-          }
-          lng={
-            (propertyDetail?.parcelDetail?.longitude as number) ??
-            selectedDraftProperty?.parcelDetail?.longitude ??
-            defaultLatLng.lng
-          }
+          sidebarSize={size}
+          lat={defaultLatLng.lat}
+          lng={defaultLatLng.lng}
           properties={properties}
-          selectedProperty={
-            !!propertyDetail?.parcelDetail ? propertyDetail : (selectedDraftProperty as any)
-          }
+          selectedProperty={propertyDetail}
           agencies={agencies}
-          propertyClassifications={propertyClassifications}
           administrativeAreas={administrativeAreas}
           lotSizes={lotSizes}
-          onMarkerClick={
-            props.onMarkerClick ??
-            ((p, position) => {
-              if (
-                p.propertyTypeId !== undefined &&
-                [PropertyTypes.BUILDING, PropertyTypes.PARCEL].includes(p.propertyTypeId)
-              ) {
-                p.id && dispatch(fetchPropertyDetail(p.id, p.propertyTypeId as any, position));
-              } else {
-                setSelectedDraftProperty({
-                  propertyTypeId: p.propertyTypeId,
-                  parcelDetail: { ...p },
-                } as any);
-              }
-            })
-          }
           onMarkerPopupClose={() => {
-            setSelectedDraftProperty(null);
             dispatch(storeParcelDetail(null));
           }}
           onViewportChanged={(mapFilterModel: MapViewportChangeEvent) => {

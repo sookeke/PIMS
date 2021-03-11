@@ -11,7 +11,7 @@ export interface IProperty {
   classificationId: number;
   classification: string;
   description: string;
-  projectNumber?: string;
+  projectNumbers?: string[];
   latitude: number;
   longitude: number;
   isSensitive: boolean;
@@ -26,6 +26,7 @@ export interface IProperty {
   administrativeArea: string;
   province: string;
   postal: string;
+  city: string;
 
   // Financial Values
   market: number;
@@ -33,10 +34,10 @@ export interface IProperty {
   netBook: number;
   netBookFiscalYear?: number;
 
-  assessed: number;
-  assessedDate?: Date | string;
-  appraised: number;
-  appraisedDate?: Date | string;
+  assessedLand?: number;
+  assessedLandDate?: Date | string;
+  assessedBuilding?: number;
+  assessedBuildingDate?: Date | string;
 
   // Parcel Properties
   landArea: number;
@@ -68,6 +69,7 @@ export interface IPropertyQueryParams {
   quantity: number;
   pid?: string;
   address?: string;
+  name?: string;
   administrativeArea?: string;
   projectNumber?: string;
   classificationId?: number;
@@ -79,4 +81,10 @@ export interface IPropertyQueryParams {
   all?: boolean;
   parcelId?: number;
   propertyType?: string;
+  inSurplusPropertyProgram?: boolean;
+  inEnhancedReferralProcess?: boolean;
+  bareLandOnly?: boolean;
+  maxNetBookValue?: number | string;
+  maxAssessedValue?: number | string;
+  maxMarketValue?: number | string;
 }

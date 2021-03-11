@@ -6,17 +6,31 @@ import { render, cleanup, fireEvent, wait } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
+import { useKeycloak } from '@react-keycloak/web';
 import { useProjectSnapshotApi } from '../hooks/useProjectSnapshotApi';
 import { IReport, ISnapshot } from '../interfaces';
 import { formatApiDateTime } from 'utils';
-
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme';
+import Claims from 'constants/claims';
 import { act } from 'react-dom/test-utils';
-import { screen } from '@testing-library/dom';
+import { screen, queryByText } from '@testing-library/dom';
 import { ToastContainer } from 'react-toastify';
 import { fillInput } from 'utils/testUtils';
+import * as reducerTypes from 'constants/reducerTypes';
 
 // Set all module functions to jest.fn
 jest.mock('../hooks/useProjectSnapshotApi');
+jest.mock('@react-keycloak/web');
+Enzyme.configure({ adapter: new Adapter() });
+(useKeycloak as jest.Mock).mockReturnValue({
+  keycloak: {
+    userInfo: {
+      agencies: ['1'],
+    },
+    subject: 'test',
+  },
+});
 const mockApiResponse = {
   getProjectReports: jest.fn<Promise<IReport[]>, []>(),
   getProjectReportSnapshotsById: jest.fn<Promise<ISnapshot[]>, [number]>(),
@@ -63,12 +77,17 @@ const defaultSnapshot: ISnapshot = {
   snapshotOn: '2020-10-14T17:45:39.7381599',
   project: {
     actualFiscalYear: '2021',
+    risk: 'Green',
   } as any,
 };
 
 const renderContainer = () =>
   render(
-    <Provider store={mockStore({})}>
+    <Provider
+      store={mockStore({
+        [reducerTypes.LOOKUP_CODE]: { lookupCodes: [] },
+      })}
+    >
       <Router history={history}>
         <ToastContainer
           autoClose={5000}
@@ -90,6 +109,7 @@ describe('Spl Report Container', () => {
     mockApi().getProjectReportSnapshotsById.mockClear();
     mockApi().deleteProjectReport.mockClear();
     mockApi().updateProjectReport.mockClear();
+    jest.clearAllMocks();
   });
   afterEach(() => {
     history.push({ search: '' });
@@ -99,14 +119,18 @@ describe('Spl Report Container', () => {
   describe('basic data loading and display', () => {
     it('Displays project snapshot data', async () => {
       await act(async () => {
-        // API "returns" no results
         mockApi().getProjectReports.mockResolvedValue([
-          { ...defaultReport, to: undefined },
-          { ...defaultReport, to: undefined, name: 'report 2' },
+          { ...defaultReport, to: '' },
+          { ...defaultReport, to: '', name: 'report 2' },
         ]);
         mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
         const { findByText, container } = renderContainer();
-        await findByText('20/21');
+        const fiscalYear = await findByText('20/21');
+        const market = await findByText('$3');
+        const risk = await findByText('Green');
+        expect(fiscalYear).toBeVisible();
+        expect(market).toBeVisible();
+        expect(risk).toBeVisible();
         expect(container.firstChild).toMatchSnapshot();
       });
     });
@@ -119,17 +143,6 @@ describe('Spl Report Container', () => {
         const { container, findByText } = renderContainer();
         await findByText('No Reports Available');
         expect(container.firstChild).toMatchSnapshot();
-      });
-    });
-
-    it('Displays correct message when there are no snapshots', async () => {
-      await act(async () => {
-        // API "returns" no results
-        mockApi().getProjectReports.mockResolvedValueOnce([]);
-        mockApi().getProjectReportSnapshotsById.mockResolvedValueOnce([]);
-        const { findByText } = renderContainer();
-        const text = await findByText('No Reports Available');
-        expect(text).toBeVisible();
       });
     });
 
@@ -216,8 +229,38 @@ describe('Spl Report Container', () => {
       });
     });
 
+    it('An SPL Reporter should not be able to delete a final report', async () => {
+      await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL],
+            },
+          },
+        });
+        // API "returns" no results
+        mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport, isFinal: true }]);
+        mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
+        const { findByTitle, container } = renderContainer();
+
+        const elipsis = await findByTitle('Report 1 actions');
+        fireEvent.click(elipsis);
+        const textBox = queryByText(container, 'Delete');
+        expect(textBox).not.toBeInTheDocument();
+      });
+    });
+
     it('Displays a toast warning when trying to delete a final report', async () => {
       await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL_ADMIN],
+            },
+          },
+        });
         // API "returns" no results
         mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport, isFinal: true }]);
         mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
@@ -236,8 +279,37 @@ describe('Spl Report Container', () => {
       });
     });
 
+    it('A Financial Reporter should not see the "Mark as Final" option on a non-final report', async () => {
+      await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL],
+            },
+          },
+        });
+        // API "returns" no results
+        mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport }]);
+        mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
+        const { findByTitle, container } = renderContainer();
+        const elipsis = await findByTitle('Report 1 actions');
+        fireEvent.click(elipsis);
+        const finalButton = queryByText(container, 'Mark as Final');
+        expect(finalButton).not.toBeInTheDocument();
+      });
+    });
+
     it('Calls the update api when the Mark as Final button is clicked on a non-final report', async () => {
       await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL_ADMIN],
+            },
+          },
+        });
         // API "returns" no results
         mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport }]);
         mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
@@ -253,6 +325,14 @@ describe('Spl Report Container', () => {
 
     it('Displays a warning when a user tries to remove the final flag', async () => {
       await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL_ADMIN],
+            },
+          },
+        });
         // API "returns" no results
         mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport, isFinal: true }]);
         mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);
@@ -269,6 +349,14 @@ describe('Spl Report Container', () => {
 
     it('Updates the report when a user confirms the final flag removal', async () => {
       await act(async () => {
+        (useKeycloak as jest.Mock).mockReturnValue({
+          keycloak: {
+            subject: 'test',
+            userInfo: {
+              roles: [Claims.REPORTS_SPL_ADMIN],
+            },
+          },
+        });
         // API "returns" no results
         mockApi().getProjectReports.mockResolvedValue([{ ...defaultReport, isFinal: true }]);
         mockApi().getProjectReportSnapshotsById.mockResolvedValue([defaultSnapshot]);

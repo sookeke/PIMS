@@ -26,12 +26,14 @@ exports[`ExemptionEnhancedReferralCompleteForm renders successfully 1`] = `
           Exemption Rationale
         </label>
         <textarea
-          className="col-md-auto form-control"
-          disabled={true}
+          className="col-md-5 form-control"
           id="input-exemptionRationale"
           name="exemptionRationale"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
         />
       </div>
     </div>
@@ -112,7 +114,7 @@ exports[`ExemptionEnhancedReferralCompleteForm renders successfully 1`] = `
       </div>
     </div>
     <h3>
-      Option 1: Transfer within the GRE
+      Option 1: Transfer within the Greater Reporting Entity
     </h3>
     <div
       className="form-row"
@@ -262,31 +264,27 @@ exports[`ExemptionEnhancedReferralCompleteForm renders successfully 1`] = `
           </div>
         </div>
       </div>
-      <div
-        className="justify-content-center"
+      <button
+        className="btn btn-primary"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
       >
-        <button
-          className="btn btn-primary"
-          disabled={true}
-          onClick={[Function]}
-          type="button"
-        >
-          Proceed to SPL
-        </button>
-        <div
-          className="c0"
-        >
-          OR
-        </div>
-        <button
-          className="btn btn-primary"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-        >
-          Not Included in the SPL
-        </button>
+        Proceed to SPL
+      </button>
+      <div
+        className="c0"
+      >
+        OR
       </div>
+      <button
+        className="btn btn-primary"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Not Included in the SPL
+      </button>
     </div>
     <h3>
       Option 3: Add to Enhanced Referral Process

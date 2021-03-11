@@ -9,13 +9,22 @@ namespace Pims.Api.Areas.Admin.Models.Agency
         /// <summary>
         /// get/set - The agency description.
         /// </summary>
-        /// <value></value>
         public string Description { get; set; }
 
+        /// <summary>
+        /// get/set - The agency email.
+        /// </summary>
         public string Email { get; set; }
 
-        public string SendEmail { get; set; }
-        
+        /// <summary>
+        /// get/set - Whether to send email to the agency.
+        /// </summary>
+        public bool SendEmail { get; set; }
+
+        /// <summary>
+        /// get/set - Who the email will be addressed to.
+        /// </summary>
+        public string AddressTo { get; set; }
         #endregion
     }
 }

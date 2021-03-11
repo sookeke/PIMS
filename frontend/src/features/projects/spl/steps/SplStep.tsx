@@ -21,6 +21,7 @@ import {
   useProject,
   DisposeWorkflowStatus,
   handleValidate,
+  IApiProject,
 } from '../../common';
 import { ValidationGroup } from 'components/common/tabValidation';
 import {
@@ -36,6 +37,7 @@ import {
 import { ApprovalActions } from 'features/projects/erp';
 import { DocumentationStepSchema } from 'features/projects/dispose';
 import { useHistory } from 'react-router-dom';
+import { toFlatProject } from 'features/projects/common/projectConverter';
 
 const CenterBoldText = styled.div`
   text-align: center;
@@ -74,6 +76,9 @@ const SplStep = ({ formikRef }: IStepProps) => {
   const currentTab = useSelector<RootState, string | null>(state => state.splTab) ?? defaultTab;
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const goToGreTransferred = () =>
+    history.push(`./spl/gretransfer?projectNumber=${project?.projectNumber}`);
 
   //** Different validation rules based on the status selected. */
   const splValidationGroups: ValidationGroup[] = [
@@ -138,11 +143,19 @@ const SplStep = ({ formikRef }: IStepProps) => {
   const canUserEdit =
     canUserOverride() ||
     (canUserApproveForm() &&
-      (project?.statusCode === ReviewWorkflowStatus.ApprovedForSpl ||
-        project?.statusCode === ReviewWorkflowStatus.PreMarketing ||
-        project?.statusCode === ReviewWorkflowStatus.OnMarket ||
-        project?.statusCode === ReviewWorkflowStatus.ContractInPlaceConditional ||
-        currentTab === SPPApprovalTabs.closeOutForm));
+      _.includes(
+        [
+          ReviewWorkflowStatus.ApprovedForSpl,
+          ReviewWorkflowStatus.PreMarketing,
+          ReviewWorkflowStatus.OnMarket,
+          ReviewWorkflowStatus.ContractInPlaceConditional,
+          ReviewWorkflowStatus.ContractInPlaceUnconditional,
+          ReviewWorkflowStatus.NotInSpl,
+        ],
+        project?.statusCode,
+      )) ||
+    currentTab === SPPApprovalTabs.closeOutForm;
+
   const setCurrentTab = (tabName: string) => {
     dispatch(saveSplTab(tabName));
   };
@@ -152,15 +165,14 @@ const SplStep = ({ formikRef }: IStepProps) => {
     <Container fluid className="splStep">
       <Formik
         initialValues={initialValues}
-        validateOnMount={true}
         onSubmit={(values: IProject, actions) => {
           return onSubmitReview(
             values,
             formikRef,
             submitStatusCode,
             getStatusTransitionWorkflow(submitStatusCode),
-          ).then((project: IProject) => {
-            actions.setValues(project);
+          ).then((project: IApiProject) => {
+            actions.resetForm({ values: toFlatProject(project) });
             if (
               project?.statusCode === ReviewWorkflowStatus.NotInSpl ||
               project?.statusCode === ReviewWorkflowStatus.ApprovedForSpl
@@ -171,18 +183,20 @@ const SplStep = ({ formikRef }: IStepProps) => {
             }
           });
         }}
-        validate={(values: IProject) =>
-          submitStatusCode === undefined ||
-          submitStatusCode === ReviewWorkflowStatus.NotInSpl ||
-          submitStatusCode === ReviewWorkflowStatus.Disposed ||
-          submitStatusCode === ReviewWorkflowStatus.OnMarket ||
-          submitStatusCode === ReviewWorkflowStatus.ContractInPlaceConditional ||
-          submitStatusCode === ReviewWorkflowStatus.ContractInPlaceUnconditional
-            ? handleValidate(values, getValidationGroups(submitStatusCode))
-            : Promise.resolve({})
-        }
+        validate={async (values: IProject) => {
+          const errors =
+            submitStatusCode === undefined ||
+            submitStatusCode === ReviewWorkflowStatus.NotInSpl ||
+            submitStatusCode === ReviewWorkflowStatus.Disposed ||
+            submitStatusCode === ReviewWorkflowStatus.OnMarket ||
+            submitStatusCode === ReviewWorkflowStatus.ContractInPlaceConditional ||
+            submitStatusCode === ReviewWorkflowStatus.ContractInPlaceUnconditional
+              ? handleValidate(values, getValidationGroups(submitStatusCode))
+              : Promise.resolve({});
+          return await errors;
+        }}
       >
-        {({ values, errors, touched, setValues }) => (
+        {({ values, errors, touched, resetForm }) => (
           <Form>
             <StepStatusIcon
               preIconLabel="Approved for Surplus Property Program"
@@ -192,6 +206,7 @@ const SplStep = ({ formikRef }: IStepProps) => {
             <SplTabs
               isReadOnly={canUserEdit !== true}
               {...{ submitStatusCode, setSubmitStatusCode, currentTab, setCurrentTab }}
+              goToGreTransferred={goToGreTransferred}
             />
             <StepErrorSummary />
             {canUserEdit && (
@@ -212,8 +227,8 @@ const SplStep = ({ formikRef }: IStepProps) => {
                       formikRef,
                       submitStatusCode,
                       getStatusTransitionWorkflow(submitStatusCode),
-                    ).then((project: IProject) => {
-                      setValues(project);
+                    ).then((project: IApiProject) => {
+                      resetForm({ values: toFlatProject(project) });
                     });
                   }
                 }}

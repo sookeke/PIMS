@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Model = Pims.Api.Models;
 
 namespace Pims.Api.Areas.Property.Models.Parcel
@@ -7,7 +8,13 @@ namespace Pims.Api.Areas.Property.Models.Parcel
         #region Properties
         public int Id { get; set; }
 
-        public string ProjectNumber { get; set; }
+        public int PropertyTypeId { get; set; }
+
+        public IEnumerable<string> ProjectNumbers { get; set; }
+
+        public string ProjectWorkflow { get; set; }
+
+        public string ProjectStatus { get; set; }
 
         public string Name { get; set; }
 
@@ -16,6 +23,8 @@ namespace Pims.Api.Areas.Property.Models.Parcel
         public int ClassificationId { get; set; }
 
         public string Classification { get; set; }
+
+        public string EncumbranceReason { get; set; }
 
         public int AgencyId { get; set; }
 

@@ -49,7 +49,7 @@ const ErpTabs: React.FunctionComponent<IErpTabsProps> = ({
   }
 
   return (
-    <React.Fragment>
+    <>
       <ErrorTabs setCurrentTab={setCurrentTab} currentTab={currentTab}>
         <Tab
           eventKey={SPPApprovalTabs.projectInformation}
@@ -69,7 +69,7 @@ const ErpTabs: React.FunctionComponent<IErpTabsProps> = ({
           tabClassName={isTabInError(errors, SPPApprovalTabs.erp)}
           eventKey={SPPApprovalTabs.erp}
           title={`${
-            values.statusCode === ReviewWorkflowStatus.ApprovedForExemption
+            values.exemptionRequested
               ? 'Exemption from the Enhanced Referral Process'
               : 'Enhanced Referral Process'
           }`}
@@ -90,7 +90,7 @@ const ErpTabs: React.FunctionComponent<IErpTabsProps> = ({
           </Tab>
         )}
       </ErrorTabs>
-    </React.Fragment>
+    </>
   );
 };
 

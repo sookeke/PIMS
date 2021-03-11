@@ -53,15 +53,22 @@ const ErpStep = ({ formikRef }: IStepProps) => {
   const canUserEdit =
     canUserOverride() ||
     (canUserApproveForm() &&
-      (project?.statusCode === ReviewWorkflowStatus.ERP ||
-        project?.statusCode === ReviewWorkflowStatus.OnHold ||
-        project?.statusCode === ReviewWorkflowStatus.ApprovedForExemption ||
-        currentTab === SPPApprovalTabs.closeOutForm));
+      _.includes(
+        [
+          ReviewWorkflowStatus.ERP,
+          ReviewWorkflowStatus.ApprovedForErp,
+          ReviewWorkflowStatus.OnHold,
+          ReviewWorkflowStatus.ApprovedForExemption,
+          ReviewWorkflowStatus.NotInSpl,
+        ],
+        project?.statusCode,
+      )) ||
+    currentTab === SPPApprovalTabs.closeOutForm;
   const setCurrentTab = (tabName: string) => {
     dispatch(saveErpTab(tabName));
   };
   const goToGreTransferred = () =>
-    history.push(`./gretransfer?projectNumber=${project?.projectNumber}`);
+    history.push(`./erp/gretransfer?projectNumber=${project?.projectNumber}`);
   const goToSpl = () =>
     history.push(`./approved?projectNumber=${project?.projectNumber}&to=ERP-ON`);
 
@@ -136,7 +143,7 @@ const ErpStep = ({ formikRef }: IStepProps) => {
             />
             <CenterBoldText>{project?.status?.name ?? 'Unknown'}</CenterBoldText>
             <ErpTabs
-              isReadOnly={canUserEdit !== true}
+              isReadOnly={!canUserEdit}
               goToGreTransferred={goToGreTransferred}
               {...{ submitStatusCode, setSubmitStatusCode, currentTab, setCurrentTab }}
             />

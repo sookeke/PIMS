@@ -1,9 +1,7 @@
 import './SelectProjectPropertiesStep.scss';
 
-import React, { useMemo, useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Container } from 'react-bootstrap';
-import { RootState } from 'reducers/rootReducer';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Button, Container } from 'react-bootstrap';
 import { Formik } from 'formik';
 import { useStepper, SelectProjectPropertiesStepYupSchema } from '..';
 import {
@@ -13,18 +11,21 @@ import {
   useStepForm,
   SelectProjectPropertiesForm,
 } from '../../common';
-import { ILookupCode } from 'actions/lookupActions';
-import { ILookupCodeState } from 'reducers/lookupCodeReducer';
-import * as API from 'constants/API';
-import _ from 'lodash';
-import useCodeLookups from 'hooks/useLookupCodes';
+import styled from 'styled-components';
+import { Classifications } from 'constants/classifications';
 
+/** contains the link text for Show Surplus and Show All classification filter */
+const LinkButton = styled(Button)`
+  margin-left: 0.5rem;
+  margin-bottom: 0.2rem;
+`;
 /**
  * Form to display two property list views, one for searching/selecting and one to show
  * the current list of properties associated to the project.
  * @param param0 {isReadOnly formikRef} formikRef allow remote formik access, isReadOnly toggle to prevent updates.
  */
 const SelectProjectPropertiesStep = ({ isReadOnly, formikRef }: IStepProps) => {
+  const { project } = useStepper();
   // Filtering and pagination state
   const [filter, setFilter] = useState<IFilterBarState>({
     searchBy: 'address',
@@ -32,32 +33,22 @@ const SelectProjectPropertiesStep = ({ isReadOnly, formikRef }: IStepProps) => {
     address: '',
     administrativeArea: '',
     projectNumber: '',
-    agencies: '',
-    classificationId: '',
+    agencies: project.agencyId,
+    classificationId: Classifications.SurplusActive.toString(),
     minLotSize: '',
     maxLotSize: '',
   });
+  const [selected, setSelected] = useState({ option: '', selected: false });
+
+  useEffect(() => {
+    if (filter.classificationId === Classifications.SurplusActive.toString()) {
+      setSelected({ option: 'Surplus Only', selected: true });
+    } else {
+      setSelected({ option: 'All', selected: true });
+    }
+  }, [filter]);
   const [pageIndex, setPageIndex] = useState(0);
   const { onSubmit, canUserEditForm } = useStepForm();
-  const { project } = useStepper();
-  const lookupCodes = useSelector<RootState, ILookupCode[]>(
-    state => (state.lookupCode as ILookupCodeState).lookupCodes,
-  );
-  const agencies = useMemo(
-    () =>
-      _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-        return lookupCode.type === API.AGENCY_CODE_SET_NAME;
-      }),
-    [lookupCodes],
-  );
-  const filterByParent = useCodeLookups().filterByParent;
-  const filteredAgencies: ILookupCode[] = useMemo(
-    () => filterByParent(agencies, project.agencyId),
-    [agencies, filterByParent, project.agencyId],
-  );
-  const propertyClassifications = _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-    return lookupCode.type === API.PROPERTY_CLASSIFICATION_CODE_SET_NAME;
-  });
 
   // Update internal state whenever the filter bar state changes
   const handleFilterChange = useCallback(
@@ -68,19 +59,61 @@ const SelectProjectPropertiesStep = ({ isReadOnly, formikRef }: IStepProps) => {
     [setFilter, setPageIndex],
   );
 
+  // Update filter to only show Surplus Active when clicked
+  const handleShowSurplusClick = () => {
+    setFilter({ ...filter, classificationId: Classifications.SurplusActive.toString() });
+  };
+
+  // Update filter to clear the classificationId when clicked
+  const handleShowAllClick = () => {
+    setFilter({
+      ...filter,
+      classificationId:
+        filter.classificationId &&
+        filter.classificationId !== Classifications.SurplusActive.toString()
+          ? filter.classificationId
+          : '',
+    });
+  };
+
+  // Check which option is seleceted for the smaller filter to keep track of which to shade the darker blue
+  const checkSelected = (option: string) => {
+    if (selected.option === option && selected.selected) {
+      return true;
+    }
+  };
+
   return isReadOnly ? null : (
     <Container fluid className="SelectProjectProperties">
       <h3 className="mr-auto">Search and select 1 or more properties for the project</h3>
       {!isReadOnly && (
-        <Container fluid className="filter-container border-bottom">
-          <Container className="px-0">
-            <FilterBar
-              agencyLookupCodes={filteredAgencies}
-              propertyClassifications={propertyClassifications}
-              onChange={handleFilterChange}
-            />
+        <>
+          <Container fluid className="filter-container border-bottom">
+            <Container className="px-0">
+              <FilterBar defaultFilter={filter} onChange={handleFilterChange} />
+            </Container>
           </Container>
-        </Container>
+          <div className="small-filter">
+            <p style={{ float: 'right' }}>
+              Show{' '}
+              <LinkButton
+                onClick={handleShowSurplusClick}
+                variant="link"
+                style={checkSelected('Surplus Only') && { color: '#1a5a96' }}
+              >
+                Surplus Active
+              </LinkButton>{' '}
+              |{' '}
+              <LinkButton
+                style={checkSelected('All') && { color: '#1a5a96' }}
+                onClick={handleShowAllClick}
+                variant="link"
+              >
+                All
+              </LinkButton>
+            </p>
+          </div>
+        </>
       )}
       <Formik
         initialValues={project}

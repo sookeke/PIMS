@@ -22,6 +22,10 @@ namespace Pims.Dal.Services
     public class ProjectService : BaseService<Project>, IProjectService
     {
         #region Variables
+        /// <summary>
+        /// An array of project status that require a clearance notification date.
+        /// </summary>
+        private readonly static string[] clearanceRequiredForStatus = new[] { "ERP-ON", "ERP-OH" }; // TODO: Should be configurable, not hard-coded.
         private readonly PimsOptions _options;
         private readonly INotificationService _notifyService;
         #endregion
@@ -125,6 +129,7 @@ namespace Pims.Dal.Services
                 {
                     this.Context.Entry(pp)
                         .Reference(p => p.Parcel).Query()
+                        .Include(p => p.Parcels).ThenInclude(p => p.Parcel)
                         .Include(p => p.Evaluations)
                         .Include(p => p.Fiscals)
                         .Include(p => p.Classification)
@@ -232,6 +237,7 @@ namespace Pims.Dal.Services
                 {
                     this.Context.Entry(pp)
                     .Reference(p => p.Parcel).Query()
+                    .Include(p => p.Parcels).ThenInclude(p => p.Parcel)
                     .Include(p => p.Evaluations)
                     .Include(p => p.Fiscals)
                     .Include(p => p.Classification)
@@ -365,8 +371,25 @@ namespace Pims.Dal.Services
             var status = workflow.Status.OrderBy(s => s.SortOrder).FirstOrDefault() ?? throw new ConfigurationException($"The workflow '{workflow.Name}' status have not been configured.");
 
             project.ProjectNumber = $"TEMP-{DateTime.UtcNow.Ticks:00000}"; // Temporary project number.
-            project.AgencyId = agency.Id; // Always assign the current user's agency to the project.
-            project.Agency = agency;
+
+            if (project.AgencyId != 0)
+            {
+                var canCreateAProjectForAgency = User.GetAgenciesAsNullable().Contains(project.AgencyId) ||
+                                                 this.User.HasPermission(Permissions.AdminProjects);
+                if (!canCreateAProjectForAgency)
+                {
+                    throw new NotAuthorizedException("User does not have permission to create a project on the behalf of this agency.");
+                }
+
+                project.Agency = Context.Agencies.FirstOrDefault(a => a.Id == project.AgencyId) ??
+                                 throw new NotAuthorizedException("The specified project agency does not exist.");
+            }
+            else
+            {
+                project.AgencyId = agency.Id; // Always assign the current user's agency to the project.
+                project.Agency = agency;
+            }
+
             project.TierLevel = this.Context.TierLevels.Find(project.TierLevelId);
             project.ReportedFiscalYear = project.ReportedFiscalYear <= 0 ? DateTime.UtcNow.GetFiscalYear() : project.ReportedFiscalYear;
             project.ActualFiscalYear = project.ReportedFiscalYear;
@@ -399,13 +422,13 @@ namespace Pims.Dal.Services
             if (parcelIds.Any())
             {
                 var parcels = this.Context.Parcels.Where(p => parcelIds.Contains(p.Id));
-                parcels.ForEach(p => p.ProjectNumber = project.ProjectNumber);
+                parcels.ForEach(p => p.UpdateProjectNumbers(project.ProjectNumber));
             }
             var buildingIds = project.Properties.Where(b => b.BuildingId != null).Select(b => b.BuildingId.Value).ToArray();
             if (buildingIds.Any())
             {
                 var buildings = this.Context.Buildings.Where(b => buildingIds.Contains(b.Id));
-                buildings.ForEach(b => b.ProjectNumber = project.ProjectNumber);
+                buildings.ForEach(b => b.UpdateProjectNumbers(project.ProjectNumber));
             }
 
             this.Context.Projects.Update(project);
@@ -553,7 +576,7 @@ namespace Pims.Dal.Services
         /// <exception cref="KeyNotFoundException">Project does not exist.</exception>
         /// <exception cref="NotAuthorizedException">User does not have permission to delete project.</exception>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task RemoveAsync(Project project)
+        public async System.Threading.Tasks.Task<Project> RemoveAsync(Project project)
         {
             project.ThrowIfNotAllowedToEdit(nameof(project), this.User, new[] { Permissions.ProjectDelete, Permissions.AdminProjects });
 
@@ -561,15 +584,15 @@ namespace Pims.Dal.Services
             var isAdmin = this.User.HasPermission(Permissions.AdminProjects);
             var originalProject = this.Context.Projects
                 .Include(p => p.Status)
-                .Include(p => p.Properties)
-                .ThenInclude(p => p.Parcel)
-                .Include(p => p.Properties)
-                .ThenInclude(p => p.Building)
+                .Include(p => p.Properties).ThenInclude(p => p.Parcel).ThenInclude(p => p.Parcels)
+
+                .Include(p => p.Notes)
+                .Include(p => p.Properties).ThenInclude(p => p.Building)
                 .Include(p => p.Tasks)
                 .Include(p => p.Workflow)
                 .SingleOrDefault(p => p.Id == project.Id) ?? throw new KeyNotFoundException();
 
-            if (!project.IsProjectInDraft(_options.Project))
+            if (!originalProject.IsProjectInDraft(_options.Project))
             {
                 this.ThrowIfNotAllowedToUpdate(originalProject, _options.Project);
             }
@@ -586,7 +609,7 @@ namespace Pims.Dal.Services
             });
             originalProject.Properties.ForEach(p =>
             {
-                this.Context.Update(p.UpdateProjectNumber(null));
+                this.Context.Update(p.RemoveProjectNumber(project.ProjectNumber));
 
                 this.Context.ProjectProperties.Remove(p);
             });
@@ -595,10 +618,9 @@ namespace Pims.Dal.Services
 
             originalProject.Notifications.ForEach(n => this.Context.NotificationQueue.Remove(n));
             originalProject.Notifications.Clear(); // TODO: Need to test this to determine if it'll let us delete a project with existing notifications.
-            originalProject.Notes.ForEach(n => this.Context.ProjectNotes.Remove(n));
-            originalProject.Notes.Clear();
             this.Context.Projects.Remove(originalProject);
             this.Context.CommitTransaction();
+            return originalProject;
         }
 
         /// <summary>
@@ -662,8 +684,7 @@ namespace Pims.Dal.Services
                 .Include(p => p.Status)
                 .Include(p => p.Agency)
                 .Include(p => p.Agency).ThenInclude(p => p.Parent)
-                .Include(p => p.Properties)
-                .ThenInclude(p => p.Parcel)
+                .Include(p => p.Properties).ThenInclude(p => p.Parcel).ThenInclude(p => p.Parcels).ThenInclude(p => p.Parcel)
                 .Include(p => p.Properties)
                 .ThenInclude(p => p.Building)
                 .Include(p => p.Tasks)
@@ -740,15 +761,20 @@ namespace Pims.Dal.Services
                     metadata.SixtyDayNotificationSentOn = now.AddDays(60);
                     metadata.NinetyDayNotificationSentOn = now.AddDays(90);
                     originalProject.ApprovedOn = now;
+                    metadata.ExemptionRequested = false; // Adding to ERP removes exemption.
                     break;
                 case ("AP-EXE"): // Approve for ERP Exemption
                     this.User.ThrowIfNotAuthorized(Permissions.DisposeApprove, "User does not have permission to approve project.");
                     if (metadata.ExemptionApprovedOn == null) throw new InvalidOperationException("ADM approved exemption on date is required before approving.");
                     originalProject.ApprovedOn = now;
                     break;
+                case ("ERP-ON"): // ERP process has begun
+                    this.Context.SetProjectPropertiesVisiblity(originalProject, true);
+                    break;
                 case ("AP-SPL"): // Approve for SPL
                     this.User.ThrowIfNotAuthorized(Permissions.DisposeApprove, "User does not have permission to approve project.");
-                    if (metadata.ClearanceNotificationSentOn == null) throw new InvalidOperationException("Approved for SPL status requires Clearance Notification Sent date.");
+                    if (metadata.ClearanceNotificationSentOn == null
+                        && clearanceRequiredForStatus.Contains(fromStatus.Status.Code)) throw new InvalidOperationException("Approved for SPL status requires Clearance Notification Sent date.");
                     if (metadata.RequestForSplReceivedOn == null) throw new InvalidOperationException("Approved for SPL status requires the date when the request was received.");
                     if (metadata.ApprovedForSplOn == null) throw new InvalidOperationException("Approved for SPL status requires the date when the request for SPL was approved on.");
                     originalProject.ApprovedOn = originalProject.ApprovedOn.HasValue ? originalProject.ApprovedOn : now; // Only set the date it hasn't been set yet.
@@ -757,7 +783,8 @@ namespace Pims.Dal.Services
                     break;
                 case ("AP-!SPL"): // Not in SPL
                     this.User.ThrowIfNotAuthorized(Permissions.DisposeApprove, "User does not have permission to approve project."); // TODO: Need to update permission claims to handle workflow better.
-                    if (metadata.ClearanceNotificationSentOn == null) throw new InvalidOperationException("Not in SPL status requires Clearance Notification Sent date.");
+                    if (metadata.ClearanceNotificationSentOn == null
+                        && clearanceRequiredForStatus.Contains(fromStatus.Status.Code)) throw new InvalidOperationException("Not in SPL status requires Clearance Notification Sent date.");
                     originalProject.ApprovedOn = originalProject.ApprovedOn.HasValue ? originalProject.ApprovedOn : now; // Only set the date it hasn't been set yet.
                     this.Context.SetProjectPropertiesVisiblity(originalProject, false);
                     break;
@@ -781,8 +808,7 @@ namespace Pims.Dal.Services
                 case ("DIS"): // DISPOSED
                     if (metadata.DisposedOn == null) throw new InvalidOperationException("Disposed status requires date the project was disposed on.");
                     this.Context.DisposeProjectProperties(originalProject);
-                    metadata.DisposedOn = now;
-                    originalProject.CompletedOn = now;
+                    originalProject.CompletedOn = metadata.DisposedOn;
                     break;
                 case ("ERP-OH"): // OnHold
                     if (metadata.OnHoldNotificationSentOn == null) throw new InvalidOperationException("On Hold status requires On Hold Notification Sent date.");
@@ -791,9 +817,6 @@ namespace Pims.Dal.Services
                 case ("T-GRE"): // Transferred within the GRE
                     if (metadata.TransferredWithinGreOn == null) throw new InvalidOperationException("Transferred within GRE status requires Transferred Within GRE date.");
                     this.Context.TransferProjectProperties(originalProject, project);
-                    break;
-                case ("ERP-ON"):
-                    this.Context.SetProjectPropertiesVisiblity(originalProject, true);
                     break;
                 default:
                     // All other status changes can only be done by `admin-projects` or when the project is in draft mode.

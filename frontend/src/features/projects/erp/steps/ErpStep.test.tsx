@@ -105,15 +105,22 @@ describe('ERP Approval Step', () => {
       const { getByText } = render(getApprovalStep());
       const proceedToSplButton = getByText(/Not Included in the SPL/);
       expect(proceedToSplButton).toBeVisible();
-      expect(proceedToSplButton).toBeDisabled();
+      expect(proceedToSplButton).toBeEnabled();
     });
-    it('form fields are not disabled', () => {
+    it('correct form fields are disabled', () => {
       const { queryAllByRole } = render(getApprovalStep());
       const textboxes = queryAllByRole('textbox');
       textboxes.forEach(textbox => {
         expect(textbox).toBeVisible();
-        if (!textbox.className.includes('date-picker') && textbox.id !== 'input-note') {
-          expect(textbox).not.toBeDisabled();
+        if (textbox.id.includes('Spl')) {
+          //only disabled textboxes are SPL related datepickers and erp emails text
+          expect(textbox).toBeEnabled();
+        } else {
+          if (textbox.id.includes('[22]')) {
+            expect(textbox).toBeDisabled();
+          } else {
+            expect(textbox).not.toBeDisabled();
+          }
         }
       });
     });
@@ -142,7 +149,7 @@ describe('ERP Approval Step', () => {
       const proceedToSplButton = component.queryByText(/Not Included in the SPL/);
       expect(proceedToSplButton).toBeDisabled();
     });
-    it('form fields are not disabled', () => {
+    it('form fields are disabled', () => {
       const component = render(getApprovalStep());
       const textboxes = component.queryAllByRole('textbox');
       textboxes.forEach(textbox => {
@@ -181,21 +188,22 @@ describe('ERP Approval Step', () => {
       project.workflowCode = DisposalWorkflows.Erp;
       const component = render(getApprovalStep(getStore(project)));
       const proceedToSplButton = component.queryByText(/Not Included in the SPL/);
-      expect(proceedToSplButton).toBeDisabled();
+      expect(proceedToSplButton).toBeEnabled();
     });
-    it('form fields are not disabled', () => {
+    it('correct form fields are disabled', () => {
       const component = render(getApprovalStep(getStore(project)));
       const textboxes = component.queryAllByRole('textbox');
       textboxes.forEach(textbox => {
-        if (
-          textbox.id === 'datepicker-requestForSplReceivedOn' ||
-          textbox.id === 'datepicker-approvedForSplOn'
-        ) {
-          expect(textbox).toBeVisible();
-          expect(textbox).toBeDisabled();
+        expect(textbox).toBeVisible();
+        if (textbox.id.includes('Spl')) {
+          //only disabled textboxes are SPL related datepickers and erp emails text
+          expect(textbox).toBeEnabled();
         } else {
-          expect(textbox).toBeVisible();
-          expect(textbox).not.toBeDisabled();
+          if (textbox.id.includes('[22]')) {
+            expect(textbox).toBeDisabled();
+          } else {
+            expect(textbox).not.toBeDisabled();
+          }
         }
       });
     });
@@ -350,12 +358,12 @@ describe('ERP Approval Step', () => {
 
     it('displays close out form tab by default if project not in spl', () => {
       const { getByText } = render(getApprovalStep(store));
-      expect(getByText('Financing Information')).toBeVisible();
+      expect(getByText('Financial Summary')).toBeVisible();
     });
 
     it('hides close out form tab otherwise', () => {
       const { queryByText } = render(getApprovalStep(getStore(mockProject)));
-      expect(queryByText('Financing Information')).toBeNull();
+      expect(queryByText('Financial Summary')).toBeNull();
     });
   });
 });

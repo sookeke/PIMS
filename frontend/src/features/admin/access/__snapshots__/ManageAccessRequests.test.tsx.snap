@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Manage access requests Snapshot matches 1`] = `
+.c0 {
+  margin-top: 0.2rem;
+}
+
 <div
   className="manage-access-requests"
 >
@@ -291,6 +295,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               IDIR/BCeID
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -314,6 +325,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               First name
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -337,6 +355,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Last name
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -360,6 +385,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Email
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -383,6 +415,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Position
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -406,6 +445,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Status
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -429,6 +475,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Agency
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -452,6 +505,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
               Role
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
           <div
@@ -475,6 +535,13 @@ exports[`Manage access requests Snapshot matches 1`] = `
               className="sortable-column"
             >
                
+              <span
+                style={
+                  Object {
+                    "flex": "1 1 auto",
+                  }
+                }
+              />
             </div>
           </div>
         </div>
@@ -837,7 +904,9 @@ exports[`Manage access requests Snapshot matches 1`] = `
                 }
               }
             >
-              <span>
+              <span
+                className="c0"
+              >
                 Show
               </span>
               <input
@@ -853,7 +922,9 @@ exports[`Manage access requests Snapshot matches 1`] = `
                 type="number"
                 value="10"
               />
-              <span>
+              <span
+                className="c0"
+              >
                 Entries
               </span>
             </div>

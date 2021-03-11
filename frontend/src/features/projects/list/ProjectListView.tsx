@@ -1,15 +1,13 @@
 import './ProjectListView.scss';
 
-import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Container } from 'react-bootstrap';
-import _ from 'lodash';
 import * as API from 'constants/API';
 import { RootState } from 'reducers/rootReducer';
-import { ILookupCode } from 'actions/lookupActions';
-import { ILookupCodeState } from 'reducers/lookupCodeReducer';
 import { IProjectFilter, IProject } from '.';
 import { columns as cols } from './columns';
+import { IProject as IProjectDetail } from 'features/projects/common';
 import { Table } from 'components/Table';
 import service from '../apiService';
 import { FaFolder, FaFolderOpen, FaFileExcel, FaFileAlt } from 'react-icons/fa';
@@ -19,7 +17,13 @@ import { Col } from 'react-bootstrap';
 import { Input, Button, Select } from 'components/common/form';
 import GenericModal from 'components/common/GenericModal';
 import { useHistory } from 'react-router-dom';
-import { ReviewWorkflowStatus, IStatus, fetchProjectStatuses } from '../common';
+import {
+  ReviewWorkflowStatus,
+  IStatus,
+  fetchProjectStatuses,
+  deleteProjectWarning,
+  deletePotentialSubdivisionParcels,
+} from '../common';
 import useKeycloakWrapper from 'hooks/useKeycloakWrapper';
 import Claims from 'constants/claims';
 import { ENVIRONMENT } from 'constants/environment';
@@ -29,6 +33,11 @@ import { mapLookupCodeWithParentString, mapStatuses } from 'utils';
 import styled from 'styled-components';
 import TooltipWrapper from 'components/common/TooltipWrapper';
 import { ParentSelect } from 'components/common/form/ParentSelect';
+import variables from '_variables.module.scss';
+import useCodeLookups from 'hooks/useLookupCodes';
+import useDeepCompareEffect from 'hooks/useDeepCompareEffect';
+import { PropertyTypes } from 'constants/propertyTypes';
+import { toFlatProject } from '../common/projectConverter';
 
 interface IProjectFilterState {
   name?: string;
@@ -55,7 +64,7 @@ export const getProjectFinancialReportUrl = (filter?: IProjectFilter) =>
 
 const FileIcon = styled(Button)`
   background-color: white !important;
-  color: #003366 !important;
+  color: ${variables.primaryColor} !important;
 `;
 
 const initialQuery: IProjectFilter = {
@@ -93,20 +102,12 @@ interface IProps {
 }
 
 const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
-  // lookup codes, etc
-  const lookupCodes = useSelector<RootState, ILookupCode[]>(
-    state => (state.lookupCode as ILookupCodeState).lookupCodes,
-  );
-  const agencies = useMemo(
-    () =>
-      _.filter(lookupCodes, (lookupCode: ILookupCode) => {
-        return lookupCode.type === API.AGENCY_CODE_SET_NAME;
-      }),
-    [lookupCodes],
-  );
+  const lookupCodes = useCodeLookups();
+  const agencies = useMemo(() => lookupCodes.getByType(API.AGENCY_CODE_SET_NAME), [lookupCodes]);
   const projectStatuses = useSelector<RootState, IStatus[]>(state => state.statuses as any);
   const keycloak = useKeycloakWrapper();
-  const [deleteId, setDeleteId] = React.useState<string | undefined>();
+  const [deleteProjectNumber, setDeleteProjectNumber] = React.useState<string | undefined>();
+  const [deletedProject, setDeletedProject] = React.useState<IProjectDetail | undefined>();
   const agencyIds = useMemo(() => agencies.map(x => parseInt(x.id, 10)), [agencies]);
   const agencyOptions = (agencies ?? []).map(c => mapLookupCodeWithParentString(c, agencies));
   const statuses = (projectStatuses ?? []).map(c => mapStatuses(c));
@@ -114,6 +115,9 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
 
   // We'll start our table without any data
   const [data, setData] = useState<IProject[] | undefined>(undefined);
+  const hasSubdivisions = deletedProject?.properties?.some(
+    p => p.propertyTypeId === PropertyTypes.SUBDIVISION,
+  );
 
   // Filtering and pagination state
   const [filter, setFilter] = useState<IProjectFilterState>({});
@@ -135,11 +139,16 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
     [setPageSize, setPageIndex],
   );
 
+  // the following claims are passed through to the columns in order to determine whether to display delete option
+  const isAdmin = keycloak.hasClaim(Claims.ADMIN_PROJECTS);
+  const projectEditClaim = keycloak.hasClaim(Claims.PROJECT_EDIT);
+  const user = `${keycloak.lastName}, ${keycloak.firstName}`;
+
   // Update internal state whenever the filter bar state changes
   const handleFilterChange = useCallback(
     (value: IProjectFilterState) => {
-      (value as any).agencies?.value
-        ? setFilter({ ...value, agencies: (value as any)?.agencies.value })
+      (value as any).agencies
+        ? setFilter({ ...value, agencies: (value as any)?.agencies })
         : setFilter({ ...value });
       if ((value as any).statusId) {
         setFilter({ ...value, statusId: (value as any).statusId?.map((x: any) => x) });
@@ -196,7 +205,7 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
   const route = history.location.pathname;
 
   // Listen for changes in pagination and use the state to fetch our new data
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     route === '/projects/list' && dispatch(fetchProjectStatuses());
     fetchData({ pageIndex, pageSize, filter, agencyIds });
   }, [fetchData, pageIndex, pageSize, filter, agencyIds, dispatch, route]);
@@ -221,15 +230,18 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
   };
 
   const handleDelete = async () => {
-    const project = data?.find(p => p.projectNumber === deleteId);
+    const project = data?.find(p => p.projectNumber === deleteProjectNumber);
     if (project) {
-      await service.deleteProject(project);
+      project.status = projectStatuses.find((x: any) => x.name === project.status)!;
+      const deletedProject = await service.deleteProject(project);
       setData(data?.filter(p => p.projectNumber !== project.projectNumber));
+      setDeleteProjectNumber(undefined);
+      setDeletedProject(toFlatProject(deletedProject));
     }
   };
 
   const initiateDelete = (projectNumber: string) => {
-    setDeleteId(projectNumber);
+    setDeleteProjectNumber(projectNumber);
   };
 
   const onRowClick = (row: IProject) => {
@@ -315,15 +327,25 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
         )}
       </div>
       <div className="ScrollContainer">
-        {!!deleteId && (
+        {!!deleteProjectNumber && (
           <GenericModal
-            display={!!deleteId}
+            display={!!deleteProjectNumber}
             cancelButtonText="Cancel"
             okButtonText="Yes, Delete"
             handleOk={handleDelete}
-            handleCancel={() => setDeleteId(undefined)}
+            handleCancel={() => setDeleteProjectNumber(undefined)}
             title="Confirm Delete"
-            message="Are you sure that you want to delete this project?"
+            message={deleteProjectWarning}
+          />
+        )}
+        {hasSubdivisions && (
+          <GenericModal
+            display={hasSubdivisions}
+            okButtonText="Ok"
+            handleOk={handleDelete}
+            handleCancel={() => setDeletedProject(undefined)}
+            title="Clean up Subdivisions"
+            message={deletePotentialSubdivisionParcels}
           />
         )}
         <Container fluid className="TableToolbar">
@@ -354,7 +376,11 @@ const ProjectListView: React.FC<IProps> = ({ filterable, title, mode }) => {
         <Table<IProject>
           name="projectsTable"
           clickableTooltip="View Disposal Project details"
-          columns={mode === PageMode.APPROVAL ? columns() : columns(initiateDelete)}
+          columns={
+            mode === PageMode.APPROVAL
+              ? columns()
+              : columns(initiateDelete, isAdmin, projectEditClaim, user)
+          }
           data={data || []}
           loading={data === undefined}
           onRequestData={handleRequestData}

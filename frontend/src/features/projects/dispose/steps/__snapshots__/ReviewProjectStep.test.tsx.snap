@@ -49,6 +49,9 @@ exports[`renders correctly 1`] = `
             name="projectNumber"
             onBlur={[Function]}
             onChange={[Function]}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             placeholder="SPP-XXXXXX"
             value=""
           />
@@ -68,12 +71,15 @@ exports[`renders correctly 1`] = `
           </label>
           <input
             className="col-md-5 form-control"
+            data-testid="project-name"
             disabled={true}
             id="input-name"
             name="name"
             onBlur={[Function]}
             onChange={[Function]}
-            required={true}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             value=""
           />
         </div>
@@ -92,11 +98,15 @@ exports[`renders correctly 1`] = `
           </label>
           <textarea
             className="col-md-auto form-control"
+            data-testid="project-description"
             disabled={true}
             id="input-description"
             name="description"
             onBlur={[Function]}
             onChange={[Function]}
+            onFocus={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
             value=""
           />
         </div>
@@ -154,6 +164,24 @@ exports[`renders correctly 1`] = `
         >
           Financial Information
         </h3>
+      </div>
+      <div
+        className="form-row"
+      >
+        <h6
+          className="col-md-12"
+          style={
+            Object {
+              "margin": "0 0 1rem 0",
+            }
+          }
+        >
+          These values are for the 
+          <strong>
+            project
+          </strong>
+          , not the individual properties.
+        </h6>
       </div>
       <div
         className="form-row"
@@ -341,7 +369,7 @@ exports[`renders correctly 1`] = `
             }
           }
         >
-          Please make any necessary updates to the valuation information and the classification.
+          Please update  the property classification.
         </h6>
         <h2
           className="col-md-5"
@@ -374,7 +402,7 @@ exports[`renders correctly 1`] = `
                   Object {
                     "display": "flex",
                     "flex": "1 0 auto",
-                    "minWidth": "645px",
+                    "minWidth": "790px",
                   }
                 }
               >
@@ -399,6 +427,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Agency
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -422,6 +457,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Name
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -445,6 +487,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Civic Address
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -468,6 +517,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Classification
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -491,6 +547,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Current Zoning Code
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -513,7 +576,14 @@ exports[`renders correctly 1`] = `
                   <div
                     className="sortable-column"
                   >
-                    Potential Zoning Code
+                    Other Projects
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -537,6 +607,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Net Book Value
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -560,6 +637,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Market Value
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -582,7 +666,44 @@ exports[`renders correctly 1`] = `
                   <div
                     className="sortable-column"
                   >
-                    Assessed Value
+                    Assessed Land
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
+                  </div>
+                </div>
+                <div
+                  className="th"
+                  colSpan={1}
+                  role="columnheader"
+                  style={
+                    Object {
+                      "alignItems": "center",
+                      "boxSizing": "border-box",
+                      "display": "flex",
+                      "flex": "145 0 auto",
+                      "justifyContent": "flex-start",
+                      "minWidth": "145px",
+                      "textAlign": "left",
+                      "width": "145px",
+                    }
+                  }
+                >
+                  <div
+                    className="sortable-column"
+                  >
+                    Assessed Building
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
                 <div
@@ -606,6 +727,13 @@ exports[`renders correctly 1`] = `
                     className="sortable-column"
                   >
                     Type
+                    <span
+                      style={
+                        Object {
+                          "flex": "1 1 auto",
+                        }
+                      }
+                    />
                   </div>
                 </div>
               </div>
@@ -625,44 +753,6 @@ exports[`renders correctly 1`] = `
     <h3>
       Documentation
     </h3>
-    <h3>
-      Approval
-    </h3>
-    <div
-      className="form-row"
-    >
-      <div
-        className="required form-group"
-      >
-        <div
-          className="check-field"
-        >
-          <div
-            className="form-check"
-          >
-            <input
-              checked={true}
-              className="form-check-input position-static"
-              disabled={true}
-              id="input-confirmation"
-              name="confirmation"
-              onChange={[Function]}
-              required={true}
-              type="checkbox"
-              value={true}
-            />
-          </div>
-          <label
-            className="form-label"
-            htmlFor="input-confirmation"
-          >
-            I, Pims User, confirm by checking this box that I have received the approval 
-  to request the property be submitted to the Enhanced Referral Program and marketed internally to other Ministry 
-  and Broader Public Sector Agencies for 90 days before listing the property to be sold on the public commercial real estate market
-          </label>
-        </div>
-      </div>
-    </div>
     <h3>
       Enhanced Referral Process Exemption
       <svg
@@ -707,6 +797,7 @@ exports[`renders correctly 1`] = `
               disabled={true}
               id="input-exemptionRequested"
               name="exemptionRequested"
+              onBlur={[Function]}
               onChange={[Function]}
               type="checkbox"
               value={false}
@@ -717,6 +808,43 @@ exports[`renders correctly 1`] = `
             htmlFor="input-exemptionRequested"
           >
             Apply for Enhanced Referral Process exemption
+          </label>
+        </div>
+      </div>
+    </div>
+    <h3>
+      Approval
+    </h3>
+    <div
+      className="form-row"
+    >
+      <div
+        className="required form-group"
+      >
+        <div
+          className="check-field"
+        >
+          <div
+            className="form-check"
+          >
+            <input
+              checked={true}
+              className="form-check-input position-static"
+              disabled={true}
+              id="input-confirmation"
+              name="confirmation"
+              onBlur={[Function]}
+              onChange={[Function]}
+              required={true}
+              type="checkbox"
+              value={true}
+            />
+          </div>
+          <label
+            className="form-label"
+            htmlFor="input-confirmation"
+          >
+            My Ministry/Agency has approval/authority to submit the Disposal Project to SRES for review.
           </label>
         </div>
       </div>
@@ -740,6 +868,9 @@ exports[`renders correctly 1`] = `
           name="note"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
           value=""
         />
       </div>
@@ -786,6 +917,9 @@ exports[`renders correctly 1`] = `
           name="publicNote"
           onBlur={[Function]}
           onChange={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
           value=""
         />
       </div>

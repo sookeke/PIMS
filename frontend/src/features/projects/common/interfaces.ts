@@ -16,7 +16,7 @@ export interface IProperty {
   classification: string;
   name: string;
   description: string;
-  projectNumber?: string;
+  projectNumbers?: string[];
   latitude: number;
   longitude: number;
   isSensitive: boolean;
@@ -33,27 +33,28 @@ export interface IProperty {
   postal: string;
 
   // Financial Values
-  market: number;
+  market: number | '';
   marketFiscalYear?: number;
   marketRowVersion?: string;
-  netBook: number;
+  netBook: number | '';
   netBookFiscalYear?: number;
   netBookRowVersion?: string;
 
-  assessed: number;
-  assessedDate?: Date | string;
-  assessedFirm?: string;
-  assessedRowVersion?: string;
-  appraised: number;
-  appraisedDate?: Date | string;
-  appraisedFirm?: string;
-  appraisedRowVersion?: string;
+  assessedLand?: number | '';
+  assessedLandDate?: Date | string;
+  assessedLandFirm?: string;
+  assessedLandRowVersion?: string;
+  assessedBuilding?: number | '';
+  assessedBuildingDate?: Date | string;
+  assessedBuildingFirm?: string;
+  assessedBuildingRowVersion?: string;
 
   // Parcel Properties
   landArea: number;
   landLegalDescription: string;
   zoning?: string;
   zoningPotential?: string;
+  parcels?: IParentParcel[];
 
   // Building Properties
   parcelId?: number;
@@ -70,6 +71,12 @@ export interface IProperty {
   transferLeaseOnSale?: boolean;
   rentableArea?: number;
   rowVersion?: string;
+}
+
+export interface IParentParcel {
+  pid: string;
+  pin: number;
+  id: number;
 }
 
 /**
@@ -131,6 +138,7 @@ export interface IProject {
   agencyId: number;
   agency?: string;
   subAgency?: string;
+  agencyName?: string;
   statusId: number;
   status?: IStatus;
   exemptionRequested?: boolean;
@@ -406,9 +414,10 @@ export interface IApiProperty {
   id: number;
   parcelId?: number;
   buildingId?: number;
+  propertyTypeId: number;
   pid?: string;
   pin?: number | '';
-  projectNumber: string;
+  projectNumbers: string[];
   latitude: number;
   longitude: number;
   classification?: string;
@@ -428,6 +437,7 @@ export interface IApiProperty {
   evaluations: IEvaluation[];
   fiscals: IFiscal[];
   rowVersion?: string;
+  parcels?: IParentParcel[];
 }
 
 export enum AgencyResponses {

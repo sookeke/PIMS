@@ -1,25 +1,47 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { SresManual } from 'features/projects/common';
-import { ReactComponent as CloseSquare } from 'assets/images/close-square.svg';
 import TooltipWrapper from 'components/common/TooltipWrapper';
 import VisibilitySensor from 'react-visibility-sensor';
-import { INVENTORY_POLICY_URL } from 'constants/strings';
+import { InventoryPolicy } from './InventoryPolicy';
+import { SidebarSize, SidebarContextType } from '../hooks/useQueryParamSideBar';
+import { FaWindowClose } from 'react-icons/fa';
+import './MapSideBarLayout.scss';
+import variables from '_variables.module.scss';
+import AbbreviatedText from 'components/common/AbbreviatedText';
 
 interface IMapSideBarLayoutProps {
   show: boolean;
-  setShowSideBar: (show: boolean) => void;
+  setShowSideBar: (
+    show: boolean,
+    contextName?: SidebarContextType,
+    size?: SidebarSize,
+    resetIds?: boolean,
+  ) => void;
+  title: React.ReactNode;
+  hidePolicy?: boolean;
+  size?: SidebarSize;
+  /** property name for title */
+  propertyName?: string;
 }
 
 const HeaderRow = styled.div`
   display: flex;
   align-items: center;
   height: 4rem;
-  svg:hover {
-    cursor: pointer;
-    filter: opacity(0.8);
-  }
+`;
+
+const CloseIcon = styled(FaWindowClose)`
+  color: ${variables.textColor};
+  font-size: 30px;
+  cursor: pointer;
+`;
+
+const Title = styled.span`
+  font-size: 24px;
+  font-weight: 700;
+  width: 100%;
+  text-align: left;
 `;
 
 /**
@@ -29,22 +51,35 @@ const HeaderRow = styled.div`
 const MapSideBarLayout: React.FunctionComponent<IMapSideBarLayoutProps> = ({
   show,
   setShowSideBar,
+  hidePolicy,
+  title,
+  size,
+  propertyName,
   ...props
 }) => {
   return (
-    <div className={classNames('map-side-drawer', show ? 'show' : null)}>
+    <div
+      className={classNames('map-side-drawer', show ? 'show' : null, {
+        close: !show,
+        narrow: size === 'narrow',
+      })}
+    >
       <VisibilitySensor partialVisibility={true}>
         {({ isVisible }: any) => (
           <>
             <HeaderRow>
-              <h2 className="mr-auto">Property Details</h2>
-              <SresManual clickUrl={INVENTORY_POLICY_URL} hideText={true} />
-              <small className="p-1 mr-2">Inventory Policy</small>
+              <Title className="mr-auto">{title}</Title>
+              {!hidePolicy && <InventoryPolicy />}
               <TooltipWrapper toolTipId="close-sidebar-tooltip" toolTip="Close Form">
-                <CloseSquare title="close" onClick={() => setShowSideBar(false)} />
+                <CloseIcon
+                  title="close"
+                  onClick={() => setShowSideBar(false, undefined, undefined, true)}
+                />
               </TooltipWrapper>
             </HeaderRow>
-
+            {propertyName && (
+              <AbbreviatedText text={propertyName} maxLength={50} className="propertyName" />
+            )}
             {isVisible ? props.children : null}
           </>
         )}

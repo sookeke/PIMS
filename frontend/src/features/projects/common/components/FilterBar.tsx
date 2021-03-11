@@ -1,12 +1,16 @@
 import './FilterBar.scss';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Col } from 'react-bootstrap';
-import { Formik, useFormikContext } from 'formik';
-import { ILookupCode } from 'actions/lookupActions';
-import { Form, Select, SelectOption, InputGroup, Input } from 'components/common/form';
+import { Formik, getIn, useFormikContext } from 'formik';
+import { Form, Select, InputGroup, Input } from 'components/common/form';
 import ResetButton from 'components/common/form/ResetButton';
 import SearchButton from 'components/common/form/SearchButton';
+import { useCodeLookups } from 'hooks/useLookupCodes';
+import * as API from 'constants/API';
+import { Classifications } from 'constants/classifications';
+import { TypeaheadField } from 'components/common/form/Typeahead';
+import { mapLookupCode } from 'utils';
 
 const SearchBar: React.FC = () => {
   const state: { placeholders: Record<string, string> } = {
@@ -44,40 +48,32 @@ export interface IFilterBarState {
 }
 
 type FilterBarProps = {
-  agencyLookupCodes: ILookupCode[];
-  propertyClassifications: ILookupCode[];
   onChange: (value: IFilterBarState) => void;
+  defaultFilter: IFilterBarState;
 };
 
 /**
  * Filter bar for the Property List view
  */
-const FilterBar: React.FC<FilterBarProps> = ({
-  agencyLookupCodes,
-  propertyClassifications,
-  onChange,
-}) => {
-  const mapLookupCode = (code: ILookupCode): SelectOption => ({
-    label: code.name,
-    value: code.id.toString(),
-  });
+const FilterBar: React.FC<FilterBarProps> = ({ onChange, defaultFilter }) => {
+  const lookupCode = useCodeLookups();
   //restrict available agencies to user agencies.
-  const agencies = (agencyLookupCodes ?? []).map(c => mapLookupCode(c));
-  const classifications = (propertyClassifications ?? []).map(c => mapLookupCode(c));
+  const agencies = lookupCode.getOptionsByType(API.AGENCY_CODE_SET_NAME);
+  const classifications = lookupCode.getPropertyClassificationOptions(
+    c =>
+      +c.value !== Classifications.Demolished &&
+      +c.value !== Classifications.Disposed &&
+      +c.value !== Classifications.Subdivided,
+  );
+  const lookupCodes = useCodeLookups();
+  const adminAreas = lookupCodes
+    .getByType(API.AMINISTRATIVE_AREA_CODE_SET_NAME)
+    .map(c => mapLookupCode(c));
+  const [clear, setClear] = useState(false);
 
   return (
     <Formik<IFilterBarState>
-      initialValues={{
-        searchBy: 'address',
-        pid: '',
-        address: '',
-        administrativeArea: '',
-        projectNumber: '',
-        agencies: '',
-        classificationId: '',
-        minLotSize: '',
-        maxLotSize: '',
-      }}
+      initialValues={defaultFilter}
       onSubmit={(values, { setSubmitting }) => {
         setSubmitting(true);
         onChange?.({ ...values });
@@ -89,7 +85,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         setSubmitting(false);
       }}
     >
-      {({ isSubmitting, handleReset }) => (
+      {({ isSubmitting, handleReset, setFieldValue }) => (
         <Form>
           <Form.Row className="filter-bar">
             <Col className="bar-item">
@@ -106,6 +102,20 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 field="classificationId"
                 placeholder="Classification"
                 options={classifications}
+              />
+            </Col>
+            <Col className="bar-item">
+              <TypeaheadField
+                name="administrativeArea"
+                placeholder="Location"
+                selectClosest
+                hideValidation={true}
+                options={adminAreas.map(x => x.label)}
+                onChange={(vals: any) => {
+                  setFieldValue('administrativeArea', getIn(vals[0], 'name') ?? vals[0]);
+                }}
+                clearSelected={clear}
+                setClear={setClear}
               />
             </Col>
             <Col className="bar-item flex-grow-0">

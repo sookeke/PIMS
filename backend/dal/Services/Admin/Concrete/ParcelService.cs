@@ -64,7 +64,7 @@ namespace Pims.Dal.Services.Admin
             if (filter.ClassificationId.HasValue)
                 query = query.Where(p => p.ClassificationId == filter.ClassificationId);
             if (!String.IsNullOrWhiteSpace(filter.ProjectNumber))
-                query = query.Where(p => EF.Functions.Like(p.ProjectNumber, $"{filter.ProjectNumber}%"));
+                query = query.Where(p => p.ProjectNumbers.Contains(filter.ProjectNumber));
             if (!String.IsNullOrWhiteSpace(filter.Description))
                 query = query.Where(p => EF.Functions.Like(p.Description, $"%{filter.Description}%"));
             if (!String.IsNullOrWhiteSpace(filter.AdministrativeArea))
@@ -168,6 +168,35 @@ namespace Pims.Dal.Services.Admin
                 .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingConstructionType)
                 .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingPredominateUse)
                 .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingOccupantType)
+                .Where(p => p.PID == pid);
+
+            if (!parcels.Any()) throw new KeyNotFoundException();
+            if (parcels.Count() == 1) return parcels.First();
+            return parcels.SingleOrDefault(p => p.PIN == null) ?? throw new InvalidOperationException($"Parcel '{pid}' does not have a titled property, but has {parcels.Count()} untitled properties."); // If there isn't a primary titled property, throw an exception.
+        }
+
+        /// <summary>
+        /// Get the parcel for the specified 'pid'.
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <exception type="KeyNotFoundException">Entity does not exist in the datasource.</exception>
+        /// <returns></returns>
+        public Parcel GetByPidWithoutTracking(int pid)
+        {
+            this.User.ThrowIfNotAuthorized(Permissions.SystemAdmin, Permissions.AgencyAdmin);
+
+            var parcels = this.Context.Parcels
+                .Include(p => p.Classification)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Agency)
+                .Include(p => p.Agency.Parent)
+                .Include(p => p.Evaluations)
+                .Include(p => p.Fiscals)
+                .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.Address)
+                .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.Address.Province)
+                .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingConstructionType)
+                .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingPredominateUse)
+                .Include(p => p.Buildings).ThenInclude(pb => pb.Building).ThenInclude(b => b.BuildingOccupantType)
                 .AsNoTracking().Where(p => p.PID == pid);
 
             if (!parcels.Any()) throw new KeyNotFoundException();
@@ -191,6 +220,7 @@ namespace Pims.Dal.Services.Admin
             if (parcel.Classification != null && !this.Context.PropertyClassifications.Local.Any(a => a.Id == parcel.ClassificationId))
                 this.Context.Entry(parcel.Classification).State = EntityState.Unchanged;
 
+            parcel.PropertyTypeId = (int)(parcel.Parcels.Count > 0 ? PropertyTypes.Subdivision : PropertyTypes.Land);
             parcel.Agency = this.Context.Agencies.Local.FirstOrDefault(a => a.Id == parcel.AgencyId);
             parcel.Classification = this.Context.PropertyClassifications.Local.FirstOrDefault(a => a.Id == parcel.ClassificationId);
 
@@ -249,6 +279,7 @@ namespace Pims.Dal.Services.Admin
 
             parcels.ForEach(parcel =>
             {
+                parcel.PropertyTypeId = (int)(parcel.Parcels.Count > 0 ? PropertyTypes.Subdivision : PropertyTypes.Land);
                 if (parcel == null) throw new ArgumentNullException();
 
                 if (parcel.AgencyId != 0 && !this.Context.Agencies.Local.Any(a => a.Id == parcel.AgencyId))
@@ -328,6 +359,7 @@ namespace Pims.Dal.Services.Admin
             parcel.ThrowIfNotAllowedToEdit(nameof(parcel), this.User, new[] { Permissions.SystemAdmin, Permissions.AgencyAdmin });
 
             var originalParcel = this.Context.Parcels.Find(parcel.Id) ?? throw new KeyNotFoundException();
+            parcel.PropertyTypeId = originalParcel.PropertyTypeId;
 
             var entry = this.Context.Entry(originalParcel);
             entry.CurrentValues.SetValues(parcel);
@@ -409,8 +441,16 @@ namespace Pims.Dal.Services.Admin
             parcel.ThrowIfNotAllowedToEdit(nameof(parcel), this.User, new[] { Permissions.SystemAdmin, Permissions.AgencyAdmin });
 
             var originalParcel = this.Context.Parcels.Find(parcel.Id) ?? throw new KeyNotFoundException();
+            this.Context.Entry(originalParcel).Collection(p => p.Buildings).Load();
+            this.Context.Entry(originalParcel).Collection(p => p.Evaluations).Load();
+            this.Context.Entry(originalParcel).Collection(p => p.Fiscals).Load();
+            this.Context.Entry(originalParcel).Collection(p => p.Projects).Load();
 
             this.Context.Entry(originalParcel).CurrentValues.SetValues(parcel);
+            originalParcel.Buildings.Clear();
+            originalParcel.Evaluations.Clear();
+            originalParcel.Fiscals.Clear();
+            originalParcel.Projects.Clear();
             base.Remove(originalParcel);
         }
         #endregion

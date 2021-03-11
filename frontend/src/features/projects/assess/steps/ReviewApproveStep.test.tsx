@@ -40,6 +40,7 @@ const mockKeycloak = (claims: string[]) => {
 const mockStore = configureMockStore([thunk]);
 const history = createMemoryHistory();
 const mockAxios = new MockAdapter(axios);
+mockAxios.onAny().reply(200, {});
 
 const mockTasks: IProjectTask[] = [
   {
@@ -107,8 +108,7 @@ const mockProperty: IProperty = {
   postal: 'A1A 1A1',
   market: 123,
   netBook: 223,
-  assessed: 123,
-  appraised: 1000,
+  assessedLand: 123,
   landArea: 123,
   landLegalDescription: 'test',
 };

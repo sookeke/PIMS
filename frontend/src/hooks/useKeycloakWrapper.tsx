@@ -1,5 +1,9 @@
 import { useKeycloak } from '@react-keycloak/web';
+import { IProperty } from 'actions/parcelsActions';
 import { Roles } from 'constants/roles';
+import { Claims } from 'constants/claims';
+import _ from 'lodash';
+import { PropertyTypes } from 'constants/propertyTypes';
 
 /**
  * IUserInfo interface, represents the userinfo provided by keycloak.
@@ -38,12 +42,15 @@ export interface IKeycloak {
   hasClaim(claim?: string | Array<string>): boolean;
   hasAgency(agency?: number): boolean;
   agencyIds: number[];
+  canUserEditProperty: (property: IProperty | null) => boolean;
+  canUserViewProperty: (property: IProperty | null) => boolean;
+  canUserDeleteProperty: (property: IProperty | null) => boolean;
 }
 
 /**
  * Provides extension methods to interact with the `keycloak` object.
  */
-function useKeycloakWrapper(): IKeycloak {
+export function useKeycloakWrapper(): IKeycloak {
   const { keycloak } = useKeycloak();
   const userInfo = keycloak?.userInfo as IUserInfo;
 
@@ -125,6 +132,48 @@ function useKeycloakWrapper(): IKeycloak {
     return userInfo?.email;
   };
 
+  const isAdmin = hasClaim(Claims.ADMIN_PROPERTIES);
+  const canEdit = hasClaim(Claims.PROPERTY_EDIT);
+  const canDelete = hasClaim(Claims.PROPERTY_DELETE);
+
+  /**
+   * Return true if the user has permissions to edit this property
+   * NOTE: this function will be true for MOST of PIMS, but there may be exceptions for certain cases.
+   */
+  const canUserEditProperty = (property: IProperty | null): boolean => {
+    const ownsProperty = !!property?.agencyId && hasAgency(property.agencyId);
+    const notInProject = !_.some(property?.projectNumbers ?? '', _.method('includes', 'SPP'));
+    return !!property && (isAdmin || (canEdit && ownsProperty && notInProject));
+  };
+
+  /**
+   * Return true if the user has permissions to delete this property
+   * NOTE: this function will be true for MOST of PIMS, but there may be exceptions for certain cases.
+   */
+  const canUserDeleteProperty = (property: IProperty | null): boolean => {
+    const ownsProperty = !!property?.agencyId && hasAgency(property.agencyId);
+    const notInProject = !_.some(property?.projectNumbers ?? '', _.method('includes', 'SPP'));
+    const isSubdivision = property?.propertyTypeId === PropertyTypes.SUBDIVISION;
+    return (
+      !!property &&
+      (isAdmin ||
+        (canDelete && ownsProperty && notInProject) ||
+        (isSubdivision && canEdit && ownsProperty && notInProject))
+    );
+  };
+
+  /**
+   * Return true if the user has permissions to edit this property
+   * NOTE: this function will be true for MOST of PIMS, but there may be exceptions for certain cases.
+   */
+  const canUserViewProperty = (property: IProperty | null): boolean => {
+    return (
+      !!property &&
+      (hasClaim(Claims.ADMIN_PROPERTIES) ||
+        (hasClaim(Claims.PROPERTY_VIEW) && !!property?.agencyId && hasAgency(property.agencyId)))
+    );
+  };
+
   return {
     obj: keycloak,
     username: username(),
@@ -139,6 +188,9 @@ function useKeycloakWrapper(): IKeycloak {
     hasClaim: hasClaim,
     hasAgency: hasAgency,
     agencyIds: userInfo?.agencies,
+    canUserEditProperty,
+    canUserDeleteProperty,
+    canUserViewProperty,
   };
 }
 

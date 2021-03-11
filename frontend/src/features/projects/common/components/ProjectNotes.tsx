@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Form } from 'react-bootstrap';
 import { TextArea } from 'components/common/form';
 import './ProjectNotes.scss';
+import { NoteTypes } from 'constants/noteTypes';
+import styled from 'styled-components';
 
 export interface IProjectNotesProps {
   /** The formik field name by default this is notes */
@@ -16,7 +18,15 @@ export interface IProjectNotesProps {
   tooltip?: string;
   /** whether or not this text box can be interaced with */
   disabled?: boolean;
+  /** comment below label */
+  comment?: string;
 }
+
+const Comment = styled.div`
+  font-size: 12px;
+  margin-top: -100px;
+  max-width: 16.7%;
+`;
 
 /**
  * Simple notes component intended for use with formik - ensures consistent cross step styling.
@@ -29,6 +39,7 @@ export default function ProjectNotes({
   className,
   outerClassName,
   disabled,
+  comment,
 }: IProjectNotesProps) {
   return (
     <Form.Row className="ProjectNotes">
@@ -41,6 +52,7 @@ export default function ProjectNotes({
         className={className ?? 'col-md-5'}
         outerClassName={outerClassName ?? 'col-md-10'}
       />
+      {!!comment && <Comment>{comment}</Comment>}
     </Form.Row>
   );
 }
@@ -79,6 +91,29 @@ export const PublicNotes = ({
       tooltip={tooltip ?? 'Visible to SRES and project agency'}
       label={label ?? 'Shared Notes'}
       field={field ?? 'publicNote'}
+      className={className}
+      outerClassName={outerClassName}
+    />
+  );
+};
+
+export const ErpNotificationNotes = ({
+  label,
+  tooltip,
+  field,
+  className,
+  outerClassName,
+  disabled,
+}: IProjectNotesProps) => {
+  return (
+    <ProjectNotes
+      disabled={disabled}
+      tooltip={
+        tooltip ??
+        'The contents of this note will be included in email notifications for this project related to the ERP process.'
+      }
+      label={label ?? 'Add the following text to the ERP Notification Email'}
+      field={`notes[${NoteTypes.ErpNotification}].note`}
       className={className}
       outerClassName={outerClassName}
     />

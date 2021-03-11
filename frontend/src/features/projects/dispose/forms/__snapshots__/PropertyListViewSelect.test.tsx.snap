@@ -1,27 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Property List View Select renders correctly 1`] = `
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+}
+
 <div
   class="col-md-12 PropertyListViewSelect container"
 >
   <div
     class="ScrollContainer"
   >
-    <div
-      class="TableToolbar container-fluid"
-    >
-      <h2
-        class="mr-auto"
-      >
-        Available Properties
-      </h2>
-      <button
-        class="btn btn-primary"
-        type="button"
-      >
-        Add Selected
-      </button>
-    </div>
+    <h2>
+      Available Properties
+    </h2>
     <div
       class="table"
       role="table"
@@ -32,7 +30,7 @@ exports[`Property List View Select renders correctly 1`] = `
         <div
           class="tr"
           role="row"
-          style="display: flex; flex: 1 0 auto; min-width: 675px;"
+          style="display: flex; flex: 1 0 auto; min-width: 820px;"
         >
           <div
             class="th"
@@ -45,11 +43,16 @@ exports[`Property List View Select renders correctly 1`] = `
             >
               <div>
                 <input
+                  data-testid="selectrow-parent"
+                  disabled=""
                   style="cursor: pointer;"
-                  title="Toggle All Rows Selected"
+                  title="Click to deselect all properties."
                   type="checkbox"
                 />
               </div>
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -62,6 +65,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Agency
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -74,6 +80,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Name
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -86,6 +95,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Civic Address
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -98,6 +110,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Classification
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -110,6 +125,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Current Zoning Code
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -121,7 +139,10 @@ exports[`Property List View Select renders correctly 1`] = `
             <div
               class="sortable-column"
             >
-              Potential Zoning Code
+              Other Projects
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -134,6 +155,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Net Book Value
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -146,6 +170,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Market Value
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -157,7 +184,25 @@ exports[`Property List View Select renders correctly 1`] = `
             <div
               class="sortable-column"
             >
-              Assessed Value
+              Assessed Land
+              <span
+                style="flex: 1 1 auto;"
+              />
+            </div>
+          </div>
+          <div
+            class="th"
+            colspan="1"
+            role="columnheader"
+            style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
+          >
+            <div
+              class="sortable-column"
+            >
+              Assessed Building
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -170,6 +215,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Type
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
         </div>
@@ -183,6 +231,19 @@ exports[`Property List View Select renders correctly 1`] = `
     <div
       class="table-toolbar"
     />
+    <div
+      class="TableToolbar container-fluid"
+    >
+      <strong
+        class="align-self-center mr-2"
+      />
+      <button
+        class="btn btn-secondary"
+        type="button"
+      >
+        Add To Project
+      </button>
+    </div>
   </div>
   <div
     class="ScrollContainer"
@@ -212,7 +273,7 @@ exports[`Property List View Select renders correctly 1`] = `
         <div
           class="tr"
           role="row"
-          style="display: flex; flex: 1 0 auto; min-width: 705px;"
+          style="display: flex; flex: 1 0 auto; min-width: 850px;"
         >
           <div
             class="th"
@@ -225,11 +286,16 @@ exports[`Property List View Select renders correctly 1`] = `
             >
               <div>
                 <input
+                  data-testid="selectrow-parent"
+                  disabled=""
                   style="cursor: pointer;"
-                  title="Toggle All Rows Selected"
+                  title="Click to deselect all properties."
                   type="checkbox"
                 />
               </div>
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -242,6 +308,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -254,6 +323,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Agency
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -266,6 +338,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Name
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -278,6 +353,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Civic Address
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -290,6 +368,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Classification
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -302,6 +383,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Current Zoning Code
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -313,7 +397,10 @@ exports[`Property List View Select renders correctly 1`] = `
             <div
               class="sortable-column"
             >
-              Potential Zoning Code
+              Other Projects
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -326,6 +413,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Net Book Value
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -338,6 +428,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Market Value
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -349,7 +442,25 @@ exports[`Property List View Select renders correctly 1`] = `
             <div
               class="sortable-column"
             >
-              Assessed Value
+              Assessed Land
+              <span
+                style="flex: 1 1 auto;"
+              />
+            </div>
+          </div>
+          <div
+            class="th"
+            colspan="1"
+            role="columnheader"
+            style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
+          >
+            <div
+              class="sortable-column"
+            >
+              Assessed Building
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
           <div
@@ -362,6 +473,9 @@ exports[`Property List View Select renders correctly 1`] = `
               class="sortable-column"
             >
               Type
+              <span
+                style="flex: 1 1 auto;"
+              />
             </div>
           </div>
         </div>
@@ -376,7 +490,7 @@ exports[`Property List View Select renders correctly 1`] = `
           <div
             class="tr"
             role="row"
-            style="display: flex; flex: 1 0 auto; min-width: 705px;"
+            style="display: flex; flex: 1 0 auto; min-width: 850px;"
           >
             <div
               class="td"
@@ -386,6 +500,7 @@ exports[`Property List View Select renders correctly 1`] = `
             >
               <div>
                 <input
+                  data-testid="selectrow-1"
                   style="cursor: pointer;"
                   title="Toggle Row Selected"
                   type="checkbox"
@@ -458,36 +573,60 @@ exports[`Property List View Select renders correctly 1`] = `
               
             </div>
             <div
-              class="td clickable"
+              class="td"
               role="cell"
               style="box-sizing: border-box; flex: 100 0 auto; min-width: 30px; width: 100px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
+              title=""
+            >
+              <div
+                class="c0"
+              />
+            </div>
+            <div
+              class="td clickable"
+              role="cell"
+              style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
               title="Click to view property details"
             >
-              
+              <div
+                class="form-group"
+              >
+                $1
+              </div>
             </div>
             <div
-              class="td"
+              class="td clickable"
               role="cell"
               style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-              title=""
+              title="Click to view property details"
             >
-              $1
+              <div
+                class="form-group"
+              >
+                $0
+              </div>
             </div>
             <div
-              class="td"
+              class="td clickable"
               role="cell"
               style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-              title=""
+              title="Click to view property details"
             >
-              $0
+              <div
+                class="form-group"
+              >
+                $1
+              </div>
             </div>
             <div
-              class="td"
+              class="td clickable"
               role="cell"
               style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: flex-start; display: flex;"
-              title=""
+              title="Click to view property details"
             >
-              $1
+              <div
+                class="form-group"
+              />
             </div>
             <div
               class="td clickable"
@@ -497,7 +636,6 @@ exports[`Property List View Select renders correctly 1`] = `
             >
               <svg
                 class="svg"
-                title="Land"
               >
                 icon-lot.svg
               </svg>
@@ -511,7 +649,7 @@ exports[`Property List View Select renders correctly 1`] = `
         <div
           class="tr"
           role="row"
-          style="display: flex; flex: 1 0 auto; min-width: 705px;"
+          style="display: flex; flex: 1 0 auto; min-width: 850px;"
         >
           <div
             class="th"
@@ -574,6 +712,14 @@ exports[`Property List View Select renders correctly 1`] = `
             colspan="1"
             role="columnheader"
             style="box-sizing: border-box; flex: 100 0 auto; min-width: 30px; width: 100px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
+          >
+             
+          </div>
+          <div
+            class="th"
+            colspan="1"
+            role="columnheader"
+            style="box-sizing: border-box; flex: 145 0 auto; min-width: 145px; width: 145px; justify-content: flex-start; text-align: left; align-items: center; display: flex;"
           >
              
           </div>

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace Pims.Dal.Services
 {
@@ -65,16 +66,17 @@ namespace Pims.Dal.Services
             var query = this.Context.GenerateQuery(this.User, filter);
             var properties = query.Select(x => new ProjectProperty(x)).ToArray();
 
-            var projectNumbers = properties.Select(p => p.ProjectNumber).Distinct().ToArray();
+            var projectNumbers = properties.SelectMany(p => JsonSerializer.Deserialize<IEnumerable<string>>(p.ProjectNumbers ?? "[]")).Distinct().ToArray();
             var statuses = from p in this.Context.ProjectProperties
                            where projectNumbers.Contains(p.Project.ProjectNumber)
-                           select new { p.Project.ProjectNumber, p.Project.Status };
+                           select new { p.Project.ProjectNumber, p.Project.Status, WorkflowCode = p.Project.Workflow.Code };
 
             foreach (var status in statuses)
             {
-                foreach (var projectProperty in properties.Where(property => property.ProjectNumber == status.ProjectNumber))
+                foreach (var projectProperty in properties.Where(property => property.ProjectNumbers.Contains(status.ProjectNumber)))
                 {
                     projectProperty.ProjectStatus = status.Status.Code;
+                    projectProperty.ProjectWorkflow = status.WorkflowCode;
                 }
             }
 
@@ -83,14 +85,14 @@ namespace Pims.Dal.Services
             return properties;
         }
 
+
         /// <summary>
-        /// Get an array of properties within the specified filters.
+        /// Get an array of property names within the specified filters.
         /// Will not return sensitive properties unless the user has the `sensitive-view` claim and belongs to the owning agency.
-        /// Note that the 'parcelFilter' will control the 'page' and 'quantity'.
         /// </summary>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public IEnumerable<ProjectProperty> Search(AllPropertyFilter filter)
+        public IEnumerable<string> GetNames(AllPropertyFilter filter)
         {
             this.User.ThrowIfNotAuthorized(Permissions.PropertyView);
             filter.ThrowIfNull(nameof(filter));
@@ -109,7 +111,51 @@ namespace Pims.Dal.Services
             }
 
             var query = this.Context.GenerateQuery(this.User, filter);
-            var properties = query.Select(x => new ProjectProperty(x)).ToArray();
+            var properties = query.Where(x => !string.IsNullOrWhiteSpace(x.Name)).Select(x => x.Name).ToArray();
+
+            return properties;
+        }
+
+        /// <summary>
+        /// Get an array of properties within the specified filters.
+        /// Will not return sensitive properties unless the user has the `sensitive-view` claim and belongs to the owning agency.
+        /// Note that the 'parcelFilter' will control the 'page' and 'quantity'.
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public IEnumerable<PropertyModel> Search(AllPropertyFilter filter)
+        {
+            this.User.ThrowIfNotAuthorized(Permissions.PropertyView);
+            filter.ThrowIfNull(nameof(filter));
+            if (!filter.IsValid()) throw new ArgumentException("Argument must have a valid filter", nameof(filter));
+
+            var parcelFilter = (ParcelFilter)filter;
+            var buildingFilter = (BuildingFilter)filter;
+
+            if (parcelFilter.IsValid() && !buildingFilter.IsValid())
+            {
+                filter.PropertyType = Entities.PropertyTypes.Land;
+            }
+            else if (!parcelFilter.IsValid())
+            {
+                filter.PropertyType = Entities.PropertyTypes.Building;
+            }
+
+            var query = this.Context.GenerateAllPropertyQuery(this.User, filter);
+            var properties = query.Select(p => new[] { Entities.PropertyTypes.Land, Entities.PropertyTypes.Subdivision }.Contains(p.PropertyTypeId) ? new ParcelModel(p, this.User) as PropertyModel : new BuildingModel(p, this.User)).ToArray();
+
+            var projectNumbers = properties.SelectMany(p => JsonSerializer.Deserialize<IEnumerable<string>>(p.ProjectNumbers ?? "[]")).Distinct().ToArray();
+            var statuses = from p in this.Context.ProjectProperties
+                           where projectNumbers.Contains(p.Project.ProjectNumber)
+                           select new { p.Project.ProjectNumber, p.Project.Status, WorkflowCode = p.Project.Workflow.Code, p.Project.Status.IsTerminal };
+
+            foreach (var status in statuses.Where(s => !s.IsTerminal))
+            {
+                foreach (var property in properties.Where(property => property?.ProjectNumbers?.Contains(status.ProjectNumber) == true))
+                {
+                    property.ProjectWorkflow = status.WorkflowCode;
+                }
+            }
 
             // TODO: Add optional paging ability to query.
 

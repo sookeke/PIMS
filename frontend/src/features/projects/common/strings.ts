@@ -1,6 +1,5 @@
 export const clickableTooltip = 'Click to view property details';
-export const updateInfoMessage =
-  'Please make any necessary updates to the valuation information and the classification.';
+export const updateInfoMessage = 'Please update  the property classification.';
 
 export const tierTooltips = {
   tier1Tooltip: 'Tier 1: Properties with a net value less than $1M.',
@@ -19,7 +18,7 @@ export const riskTooltips = {
 export const projectNoDescription =
   'This is a temporary number during draft state. A project number will be assigned when you submit this application.';
 export const reviewAppraisalTooltip =
-  'Required for Surplus Properties List but\noptional for Enhanced Referral Process.';
+  'Required for properties in Tier 1 and properties worth over $300,000.';
 export const reviewFirstNationsTooltip =
   'Not required to be completed before\naddition to the Surplus Properties List.';
 export const agencyResponsesNoteTooltip =
@@ -29,7 +28,7 @@ export const cancellationWarning =
 export const onHoldNotificationTooltip =
   'Enter On Hold Notification Sent Date to be able to Place Project On Hold.';
 export const onTransferredWithinTheGreTooltip =
-  'Enter Date Transferred within the GRE to be able to Update Property Information.';
+  'Enter Date Transferred within the Greater Reporting Entity to be able to Update Property Information.';
 export const clearanceNotifictionSent =
   'Enter Clearance Notification Sent date to be able to Proceed to SPL or Not Include in SPL.';
 export const requestForSplReceivedOn =
@@ -40,10 +39,16 @@ export const updatePimsWarning =
 export const proceedToSplWarning = `Are you sure you want to approve this project for the Surplus Properties List?`;
 export const notInSplWarning = `Are you sure you would like to change the status of the project to Tier 1: Not Included in SPL?`;
 export const disposeWarning = `Are you sure you want to dispose this project? This will set all properties within the project to Disposed.  Which will make them unavailable to inventory.`;
+export const disposeSubdivisionWarning = `There are one or more subdivisions within this project. All subdivisions will be converted to parcels after this project is disposed. All of the following subdivision parent parcels will be re-classified as SUBDIVIDED:`;
 export const offersReceived = `Review required for offer(s) in Tier 3 & 4.`;
 export const dateEnteredMarket = 'Date Entered Market required to change status to Marketing.';
 export const projectComments = `Please provide any variances between appraised, assessed, and sale price.`;
+export const ocgVarianceNote =
+  'Please provide an explanation for the difference between the Financial Summary amount and the OCG Gain/Loss amount (if any)';
 export const appraisalDateWarning =
   'You have entered an appraisal date that is older then the current appraisal date stored in PIMS. Are you sure that you would like to update PIMS to use this older date?';
 export const tabErrorWarning =
   'Please correct all of the highlighted errors within the red coloured tab(s) before continuing.';
+export const deleteProjectWarning = 'Are you sure that you want to delete this project?';
+export const deletePotentialSubdivisionParcels =
+  'There are Potential Subdivision Parcels associated with this project in the PIMS Inventory. Please delete or re-use for another Disposal Project.';

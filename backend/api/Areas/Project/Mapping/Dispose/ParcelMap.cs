@@ -1,6 +1,9 @@
 using Mapster;
+using Microsoft.Extensions.Options;
 using Pims.Api.Mapping.Converters;
 using Pims.Api.Models;
+using System.Collections.Generic;
+using System.Text.Json;
 using Entity = Pims.Dal.Entities;
 using Model = Pims.Api.Areas.Project.Models.Dispose;
 
@@ -8,6 +11,20 @@ namespace Pims.Api.Areas.Project.Mapping.Dispose
 {
     public class ParcelMap : IRegister
     {
+        #region Variables
+        private readonly JsonSerializerOptions _serializerOptions;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Creates a new instance of a ProjectMap, initializes with specified arguments.
+        /// </summary>
+        /// <param name="serializerOptions"></param>
+        public ParcelMap(IOptions<JsonSerializerOptions> serializerOptions)
+        {
+            _serializerOptions = serializerOptions.Value;
+        }
+        #endregion
 
         public void Register(TypeAdapterConfig config)
         {
@@ -16,7 +33,9 @@ namespace Pims.Api.Areas.Project.Mapping.Dispose
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.PID, src => src.ParcelIdentity)
                 .Map(dest => dest.PIN, src => src.PIN)
-                .Map(dest => dest.ProjectNumber, src => src.ProjectNumber)
+                .Map(dest => dest.PropertyTypeId, src => src.PropertyTypeId)
+                .Map(dest => dest.ProjectNumbers, src => JsonSerializer.Deserialize<IEnumerable<string>>(src.ProjectNumbers ?? "[]", _serializerOptions))
+                .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Description, src => src.Description)
                 .Map(dest => dest.ClassificationId, src => src.ClassificationId)
                 .Map(dest => dest.Classification, src => src.Classification.Name)
@@ -34,6 +53,7 @@ namespace Pims.Api.Areas.Project.Mapping.Dispose
                 .Map(dest => dest.Buildings, src => src.Buildings)
                 .Map(dest => dest.Evaluations, src => src.Evaluations)
                 .Map(dest => dest.Fiscals, src => src.Fiscals)
+                .Map(dest => dest.Parcels, src => src.Parcels)
                 .Inherits<Entity.BaseEntity, BaseModel>();
 
 
@@ -43,6 +63,7 @@ namespace Pims.Api.Areas.Project.Mapping.Dispose
                 .Map(dest => dest.PID, src => ParcelConverter.ConvertPID(src.PID))
                 .Map(dest => dest.PIN, src => src.PIN)
                 .Map(dest => dest.ClassificationId, src => src.ClassificationId)
+                .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Description, src => src.Description)
                 .Map(dest => dest.AgencyId, src => src.AgencyId)
                 .Map(dest => dest.Location, src => src)
@@ -56,6 +77,19 @@ namespace Pims.Api.Areas.Project.Mapping.Dispose
                 .Map(dest => dest.Buildings, src => src.Buildings)
                 .Map(dest => dest.Evaluations, src => src.Evaluations)
                 .Map(dest => dest.Fiscals, src => src.Fiscals)
+                .Map(dest => dest.Parcels, src => src.Parcels)
+                .Inherits<BaseModel, Entity.BaseEntity>();
+
+            config.NewConfig<Entity.ParcelParcel, Model.SubdivisionParcelModel>()
+                .EnableNonPublicMembers(true)
+                .Map(dest => dest.Id, src => src.Parcel.Id)
+                .Map(dest => dest.PID, src => src.Parcel.PID)
+                .Map(dest => dest.PIN, src => src.Parcel.PIN)
+                .Inherits<Entity.BaseEntity, BaseModel>();
+
+            config.NewConfig<Model.SubdivisionParcelModel, Entity.ParcelParcel>()
+                .EnableNonPublicMembers(true)
+                .Map(dest => dest.ParcelId, src => src.Id)
                 .Inherits<BaseModel, Entity.BaseEntity>();
 
             config.NewConfig<Model.ParcelModel, NetTopologySuite.Geometries.Point>()

@@ -1,10 +1,15 @@
 @import '../../../variables';
 @import '../../../colors.scss';
 .spl-reports {
+  .row {
+    flex-wrap: nowrap;
+  }
+
   .side-bar.side-bar-show {
     transform: translateX(0);
     width: 300px;
   }
+
   div.active.row {
     background-color: $accent-color;
   }
@@ -14,7 +19,6 @@
   }
 
   .side-bar {
-    z-index: 101;
     transition: 0.3s ease-in-out;
     width: 300px;
     grid-template-columns: 275px 25px;
@@ -32,6 +36,7 @@
       svg {
         width: 16px;
         height: 16px;
+        pointer-events: none;
       }
     }
     :focus {

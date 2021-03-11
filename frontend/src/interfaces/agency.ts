@@ -1,5 +1,5 @@
 export interface IAgency {
-  parentId: any;
+  parentId?: any;
   code: string;
   id: number;
   name: string;
@@ -10,13 +10,14 @@ export interface IAgency {
 
 /** for use in editing and viewing agency details */
 export interface IAgencyDetail {
-  parentId: number;
+  parentId?: number;
   email: string;
   id: number;
   name: string;
   description?: string;
   isDisabled: boolean;
   sendEmail: boolean;
+  addressTo: string;
   code: string;
   rowVersion: string;
   parent?: string;
@@ -34,6 +35,7 @@ export interface IAddAgency {
   name: string;
   code: string;
   email?: string;
+  addressTo: string;
   isDisabled: boolean;
   sendEmail: boolean;
   parentId?: number;

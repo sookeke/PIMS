@@ -89,7 +89,7 @@ namespace Pims.Api.Test.Controllers.Tools
             service.Setup(m => m.BuildingPredominateUse.GetAll()).Returns(new Entity.BuildingPredominateUse[0]);
             service.Setup(m => m.PropertyClassification.GetAll()).Returns(new[] { new Entity.PropertyClassification(1, "Classification") });
             service.Setup(m => m.Agency.GetAll()).Returns(new[] { new Entity.Agency("AEST", "Advanced Education, Skills & Training") });
-            service.Setup(m => m.Parcel.GetByPid(It.IsAny<int>())).Returns(parcel);
+            service.Setup(m => m.Parcel.GetByPidWithoutTracking(It.IsAny<int>())).Returns(parcel);
             service.Setup(m => m.AdministrativeArea.Get(It.IsAny<string>())).Returns(new Entity.AdministrativeArea("test"));
 
             // Act
@@ -142,6 +142,7 @@ namespace Pims.Api.Test.Controllers.Tools
 
             var pimsService = helper.GetService<Mock<IPimsService>>();
             pimsService.Setup(m => m.Task.GetForWorkflow(It.IsAny<string>())).Returns(new Entity.Task[0]);
+            pimsService.Setup(m => m.ProjectReport.GetAll()).Returns(Array.Empty<Entity.ProjectReport>().ToArray());
 
             var agency = new Entity.Agency("Agency", "Agency");
             var tier = new Entity.TierLevel(1, "TierLevel");
@@ -196,7 +197,7 @@ namespace Pims.Api.Test.Controllers.Tools
             };
 
             // Act
-            var result = controller.ImportProjects(projects, false);
+            var result = controller.ImportProjects(projects, false, DateTime.UtcNow);
 
             // Assert
             Assert.NotNull(result);
@@ -225,7 +226,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -333,7 +334,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -439,7 +440,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -543,7 +544,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -646,7 +647,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -748,7 +749,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);
@@ -855,6 +856,7 @@ namespace Pims.Api.Test.Controllers.Tools
 
             var pimsService = helper.GetService<Mock<IPimsService>>();
             pimsService.Setup(m => m.Task.GetForWorkflow(It.IsAny<string>())).Returns(new[] { new Entity.Task("test") });
+            pimsService.Setup(m => m.ProjectReport.GetAll()).Returns(Array.Empty<Entity.ProjectReport>().ToArray());
 
             var agency = new Entity.Agency("Agency", "Agency");
             var tier = new Entity.TierLevel(1, "TierLevel");
@@ -905,7 +907,7 @@ namespace Pims.Api.Test.Controllers.Tools
             };
 
             // Act
-            var result = controller.ImportProjects(projects, false, null, "Risk=Risk;Status=Status;Workflow=Workflow;Agency=Agency;Market=100000");
+            var result = controller.ImportProjects(projects, false, DateTime.UtcNow, "Risk=Risk;Status=Status;Workflow=Workflow;Agency=Agency;Market=100000");
 
             // Assert
             Assert.NotNull(result);
@@ -926,7 +928,7 @@ namespace Pims.Api.Test.Controllers.Tools
             first.Name.Should().Be(expectedResult.Description);
             first.Description.Should().Be(expectedResult.Description);
             first.CompletedOn.Should().Be(expectedResult.CompletedOn);
-            first.MarketedOn.Should().Be(expectedResult.MarketedOn);
+            first.MarketedOn.Should().Be(null);
             first.NetBook.Should().Be(expectedResult.NetBook);
             first.Market.Should().Be(expectedResult.Market);
             first.ProgramCost.Should().Be(expectedResult.ProgramCost);

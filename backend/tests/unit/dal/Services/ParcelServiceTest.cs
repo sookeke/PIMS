@@ -649,6 +649,286 @@ namespace Pims.Dal.Test.Services
         }
         #endregion
 
+        #region Add Parcel
+        [Fact]
+        public void Add_Parcel_NoPermission_NotAuthorized()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView);
+            var init = helper.InitializeDatabase(user);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+
+            var service = helper.CreateService<ParcelService>();
+
+            // Act
+            // Assert
+            Assert.Throws<NotAuthorizedException>(() =>
+                service.Add(parcel));
+        }
+
+        [Fact]
+        public void Add_Parcel_NotAuthorized()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit);
+            var init = helper.InitializeDatabase(user);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+
+            var service = helper.CreateService<ParcelService>();
+
+            // Act
+            parcel.Description = "a new description.";
+
+            // Assert
+            Assert.Throws<NotAuthorizedException>(() =>
+                service.Add(parcel));
+        }
+
+        [Fact]
+        public void Add_Parcel()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+            parcel.Description = "a new description.";
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Description.Should().Be("a new description.");
+        }
+
+
+        [Fact]
+        public void Add_ParcelFinancials()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            parcel.Evaluations.Add(new Entity.ParcelEvaluation(parcel, DateTime.Now, Entity.EvaluationKeys.Assessed, 1000));
+            parcel.Fiscals.Add(new Entity.ParcelFiscal(parcel, 2021, Entity.FiscalKeys.Market, 1000));
+            parcel.Fiscals.Add(new Entity.ParcelFiscal(parcel, 2021, Entity.FiscalKeys.NetBook, 2000));
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Contains(result.Evaluations, e => e.Key == Entity.EvaluationKeys.Assessed && e.Value == 1000);
+            Assert.Contains(result.Fiscals, e => e.Key == Entity.FiscalKeys.Market && e.Value == 1000);
+            Assert.Contains(result.Fiscals, e => e.Key == Entity.FiscalKeys.NetBook && e.Value == 2000);
+        }
+
+        [Fact]
+        public void Add_Parcel_AddAgencyAsAdmin()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.AdminProperties).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+            parcel.Agency = null;
+            parcel.AgencyId = 2;
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.AgencyId.Should().Be(2);
+        }
+
+        [Fact]
+        public void Add_Parcel_LinkedToProject()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var project = init.CreateProject(1);
+            project.ReportedFiscalYear = 2020;
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(1);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            // Assert, parcels linked to projects can now be updated as multiple associations are allowed.
+            service.Add(parcel);
+        }
+
+        [Fact]
+        public void Add_Subdivision_ParcelAndSubdivisionError()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.CreateParcel(1);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            var subdivision = new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 2 };
+            parcel.Parcels.Add(subdivision);
+            parcel.Subdivisions.Add(subdivision);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                service.Add(parcel));
+        }
+
+        [Fact]
+        public void Add_Subdivision_Parcel()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            var subdivision = new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 2, Parcel = originalParcel };
+            parcel.Parcels.Add(subdivision);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Parcels.FirstOrDefault().Should().Be(subdivision);
+            result.Subdivisions.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Add_Parcel_Subdivision()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.CreateParcel(1);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            var dividedParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1 };
+            parcel.Subdivisions.Add(dividedParcel);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Subdivisions.FirstOrDefault().Should().Be(dividedParcel);
+            result.Parcels.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Add_Subdivision_UniquePin()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            parcel.PID = 1; //set to the same pid as the existing parcel
+            var dividedParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1, Parcel = originalParcel };
+            parcel.Parcels.Add(dividedParcel);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.PIN.Should().Be(1);
+        }
+
+        [Fact]
+        public void Add_Subdivision_UniqueIncrementedPin()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            originalParcel.PIN = 1;
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            parcel.PID = 1; //set to the same pid as the existing parcel
+            var dividedParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1, Parcel = originalParcel };
+            parcel.Parcels.Add(dividedParcel);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.PIN.Should().Be(2);
+        }
+
+        [Fact]
+        public void Add_Subdivision_TestPidReplacement()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            originalParcel.PIN = 1;
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            var dividedParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1, Parcel = originalParcel };
+            parcel.Parcels.Add(dividedParcel);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var result = service.Add(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            result.PID.Should().Be(1);
+        }
+        #endregion
+
         #region Update Parcel
         [Fact]
         public void Update_Parcel_NoPermission_NotAuthorized()
@@ -708,6 +988,27 @@ namespace Pims.Dal.Test.Services
         }
 
         [Fact]
+        public void Update_Parcel_InProject_NotAuthorized()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit);
+            var init = helper.InitializeDatabase(user);
+            var parcel = init.CreateParcel(1);
+            init.SaveChanges();
+            parcel.ProjectNumbers = "[SPP-10000]";
+            init.Update(parcel);
+            init.SaveChanges();
+
+
+            var service = helper.CreateService<ParcelService>();
+
+            // Assert
+            Assert.Throws<NotAuthorizedException>(() =>
+                service.Update(parcel));
+        }
+
+        [Fact]
         public void Update_Parcel_ChangeAgency_NotAuthorized()
         {
             // Arrange
@@ -750,11 +1051,37 @@ namespace Pims.Dal.Test.Services
         }
 
         [Fact]
+        public void Update_ParcelFinancials()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var parcel = init.CreateParcel(1);
+            init.SaveChanges();
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            parcel.Evaluations.Add(new Entity.ParcelEvaluation(parcel, DateTime.Now, Entity.EvaluationKeys.Assessed, 1000));
+            parcel.Fiscals.Add(new Entity.ParcelFiscal(parcel, 2021, Entity.FiscalKeys.Market, 1000));
+            parcel.Fiscals.Add(new Entity.ParcelFiscal(parcel, 2021, Entity.FiscalKeys.NetBook, 2000));
+            var result = service.UpdateFinancials(parcel);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Contains(result.Evaluations, e => e.Key == Entity.EvaluationKeys.Assessed && e.Value == 1000);
+            Assert.Contains(result.Fiscals, e => e.Key == Entity.FiscalKeys.Market && e.Value == 1000);
+            Assert.Contains(result.Fiscals, e => e.Key == Entity.FiscalKeys.NetBook && e.Value == 2000);
+        }
+
+        [Fact]
         public void Update_Parcel_UpdateAgencyAsAdmin()
         {
             // Arrange
             var helper = new TestHelper();
-            var user = PrincipalHelper.CreateForPermission(Permissions.AdminProperties).AddAgency(1);
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.AdminProperties).AddAgency(1);
             var init = helper.InitializeDatabase(user);
             var parcel = init.CreateParcel(1);
             init.SaveChanges();
@@ -772,7 +1099,7 @@ namespace Pims.Dal.Test.Services
         }
 
         [Fact]
-        public void Update_Parcel_LinkedToProject_NotAuthorized()
+        public void Update_Parcel_LinkedToProject_NotAllowed()
         {
             // Arrange
             var helper = new TestHelper();
@@ -788,9 +1115,156 @@ namespace Pims.Dal.Test.Services
             var service = helper.CreateService<ParcelService>(user, options);
 
             // Act
-            // Assert
-            Assert.Throws<NotAuthorizedException>(() => service.Update(parcel));
+            // Assert, parcels linked to projects cannot be updated
+            Assert.Throws<NotAuthorizedException>(() =>
+                service.Update(parcel));
         }
+
+        [Fact]
+        public void Update_Parcel_ParcelAndSubdivisionError()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            init.CreateParcel(1);
+            init.CreateParcel(2);
+            init.SaveChanges();
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var parcelToUpdate = service.Get(1);
+            var divideParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1 };
+            parcelToUpdate.Parcels.Add(divideParcel);
+            parcelToUpdate.Subdivisions.Add(divideParcel);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                service.Update(parcelToUpdate));
+        }
+
+        [Fact]
+        public void Update_Subdivision_Parcel()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            init.CreateParcel(2);
+            init.SaveChanges();
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var parcelToUpdate = service.Get(1);
+            var divideParcel = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1, Parcel = originalParcel };
+            parcelToUpdate.Parcels.Add(divideParcel);
+            var result = service.Update(parcelToUpdate);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Parcels.FirstOrDefault().ParcelId.Should().Be(2);
+            result.Parcels.FirstOrDefault().SubdivisionId.Should().Be(1);
+            result.Subdivisions.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Update_Subdivision_Parcel_Remove()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd, Permissions.PropertyEdit).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var parcel = EntityHelper.CreateParcel(1);
+
+            var originalParcel = init.CreateParcel(2);
+            init.SaveChanges();
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var subdivision = new Entity.ParcelParcel() { ParcelId = 2, SubdivisionId = 1, Parcel = originalParcel };
+            parcel.Parcels.Add(subdivision);
+            service.Add(parcel);
+
+            var parcelToUpdate = service.Get(1);
+            parcelToUpdate.Parcels.Clear();
+            var result = service.Update(parcelToUpdate);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Subdivisions.Should().BeEmpty();
+            result.Parcels.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Update_Parcel_Subdivision_Remove()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyAdd, Permissions.PropertyEdit).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var parcel = EntityHelper.CreateParcel(1);
+
+            init.CreateParcel(2);
+            init.SaveChanges();
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            var subdivision = new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 2 };
+            parcel.Subdivisions.Add(subdivision);
+            service.Add(parcel);
+
+            var parcelToUpdate = service.Get(1);
+            parcelToUpdate.Subdivisions.Clear();
+            var result = service.Update(parcelToUpdate);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Subdivisions.Should().BeEmpty();
+            result.Parcels.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Update_Subdivision_TestPidReplacement()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyView, Permissions.PropertyEdit, Permissions.PropertyAdd).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var originalParcel = init.CreateParcel(1);
+            var updatedParcel = init.CreateParcel(3);
+            originalParcel.PIN = 1;
+            init.SaveChanges();
+            var parcel = EntityHelper.CreateParcel(2);
+            var dividedParcel = new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 2, Parcel = originalParcel };
+            parcel.Parcels.Add(dividedParcel);
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+
+            // Act
+            service.Add(parcel);
+
+            // Update the parcel to contain a new Parcel
+            var parcelToUpdate = service.Get(2);
+            parcelToUpdate.Parcels.Clear();
+            dividedParcel = new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 3, Parcel = updatedParcel };
+            parcelToUpdate.Parcels.Add(dividedParcel);
+            var result = service.Update(parcelToUpdate);
+
+            // Assert
+            Assert.NotNull(result);
+            result.PID.Should().Be(3);
+        }
+
         #endregion
 
         #region Delete Parcel
@@ -825,6 +1299,27 @@ namespace Pims.Dal.Test.Services
             var helper = new TestHelper();
             var user = PrincipalHelper.CreateForPermission();
             var parcel = EntityHelper.CreateParcel(1, 1, 1, 1);
+            helper.CreatePimsContext(user, true).AddAndSaveChanges(parcel);
+
+            var service = helper.CreateService<ParcelService>(user);
+
+            // Act
+            // Assert
+            Assert.Throws<NotAuthorizedException>(() =>
+                service.Remove(parcel));
+        }
+
+        /// <summary>
+        /// Building is in an active project
+        /// </summary>
+        [Fact]
+        public void Remove_NotAuthorized_InProject()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyDelete).AddAgency(1);
+            var parcel = EntityHelper.CreateParcel(1, 1, 1, 1);
+            parcel.ProjectNumbers = "[SPP-10000]";
             helper.CreatePimsContext(user, true).AddAndSaveChanges(parcel);
 
             var service = helper.CreateService<ParcelService>(user);
@@ -969,6 +1464,31 @@ namespace Pims.Dal.Test.Services
             // Assert
             Assert.Equal(EntityState.Detached, context.Entry(parcel).State);
         }
+
+        /// <summary>
+        /// Parcel found.
+        /// </summary>
+        [Fact]
+        public void Remove_Parent_And_Subdivisions()
+        {
+            // Arrange
+            var helper = new TestHelper();
+            var user = PrincipalHelper.CreateForPermission(Permissions.PropertyDelete, Permissions.PropertyAdd, Permissions.PropertyView).AddAgency(1);
+            var init = helper.InitializeDatabase(user);
+            var parcel = init.CreateParcel(1);
+            var subdivision = EntityHelper.CreateParcel(2);
+            parcel.Subdivisions.Add(new Entity.ParcelParcel() { ParcelId = 1, SubdivisionId = 2, Subdivision = subdivision });
+
+            var options = ControllerHelper.CreateDefaultPimsOptions();
+            var service = helper.CreateService<ParcelService>(user, options);
+            var context = helper.GetService<PimsContext>();
+            service.Add(parcel);
+
+            // Act
+            service.Remove(parcel);
+            Assert.Throws<KeyNotFoundException>(() =>
+                service.Get(2));
+        }
         #endregion
 
         #region Check PID available
@@ -1013,7 +1533,7 @@ namespace Pims.Dal.Test.Services
             Assert.False(result);
         }
         #endregion
-        
+
         #region Check PIN available
 
         /// <summary>

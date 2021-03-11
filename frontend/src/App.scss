@@ -7,27 +7,20 @@ ul.pagination li {
   cursor: pointer;
 }
 
-div.bootstrap-table {
-  .col {
-    border-bottom-width: 2px;
-    vertical-align: bottom;
-    border-bottom: 2px solid $table-color;
-    border: 1px solid $table-color;
-    padding: 0.75rem;
-  }
-  .row {
-    vertical-align: inherit;
-    margin: 0;
-  }
-  div.row:nth-of-type(even) {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  form:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  .thead {
-    font-weight: 700;
-  }
+.modal-dialog.modal-xl {
+  max-width: 1000px;
+}
+
+.modal-dialog.modal-l {
+  max-width: 750px;
+}
+
+.modal-dialog.modal-m {
+  max-width: 500px;
+}
+
+.modal-dialog.modal-s {
+  max-width: 400px;
 }
 
 .Toastify__toast.Toastify__toast--dark {
@@ -54,25 +47,39 @@ div.bootstrap-table {
   word-break: break-word;
 }
 
+.table .th.reset-filter.svg-btn {
+  display: none;
+}
+
+select.form-control.is-invalid {
+  background-image: none;
+  padding-right: 12px;
+}
+
 //by default highlight required fields in blue.
-.form-group.required input {
+.form-group.required input:not(.is-invalid) {
   border: 1px solid $secondary-variant-color;
 }
 
-.form-group.required select {
+.form-group.required select:not(.is-invalid) {
   border: 1px solid $secondary-variant-color;
 }
 
-.input-group.required input {
+.input-group.required input:not(.is-invalid) {
   border: 1px solid $secondary-variant-color;
 }
 
-.form-check.required input {
+.form-check.required input:not(.is-invalid) {
+  border: 1px solid $secondary-variant-color;
+}
+
+.form-group.required textarea:not(.is-invalid) {
   border: 1px solid $secondary-variant-color;
 }
 
 //by default, highlight dropdown options blue
-.dropdown-item {
+.dropdown-item,
+.dropdown-header {
   color: $text-color;
   &:hover {
     color: #fff;
